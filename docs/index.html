@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Candidats, programmes, chiffres vérifiés, vrai / faux, débats et sondages de la présidentielle 2027. Mis à jour chaque matin.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dossier 2027">
+<link rel="icon" type="image/png" href="favicon-64.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="Dossier 2027">
+<meta property="og:title" content="Dossier Présidentielle 2027">
+<meta property="og:description" content="Candidats, programmes, chiffres vérifiés, vrai / faux, débats et sondages de la présidentielle 2027. Mis à jour chaque matin.">
+<meta property="og:url" content="https://paul9158.github.io/dossier2027/">
+<meta property="og:image" content="https://paul9158.github.io/dossier2027/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://paul9158.github.io/dossier2027/">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<script>
+/* Version publique : les données viennent de data.json (lecture seule) au lieu de la base claude.ai.
+   Le fichier est relu quand on revient sur la page et toutes les 30 minutes, la page se met à jour seule. */
+(()=>{
+  let cur=null,pending=null,last=0;const subs=new Set();
+  const get=()=>fetch("data.json",{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("data.json : erreur "+r.status);return r.json()});
+  const load=()=>cur?Promise.resolve(cur):pending||(pending=get().then(d=>{cur=d;last=Date.now();return d}).finally(()=>{pending=null}));
+  const snap=(d,c)=>({docs:((d.collections||{})[c]||[]).map(x=>({id:x.id,data:()=>JSON.parse(JSON.stringify(x.data))}))});
+  async function refresh(){
+    if(!cur||Date.now()-last<60e3)return;last=Date.now();
+    try{const d=await get();if(d.generated!==cur.generated){cur=d;subs.forEach(s=>s.next(snap(d,s.c)))}}catch(e){}
+  }
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh()});
+  setInterval(()=>{if(document.visibilityState==="visible")refresh()},30*60e3);
+  const ro=()=>Promise.reject(new Error("Version publique : lecture seule"));
+  const db={collection:c=>({
+    onSnapshot(next,err){const s={c,next};subs.add(s);load().then(d=>{if(subs.has(s))next(snap(d,c))},e=>{if(err)err(e)});return()=>{subs.delete(s)}},
+    doc:()=>({set:ro,update:ro,delete:ro})})};
+  window.claude={use:n=>n==="db"?load().then(()=>db):n==="user"?Promise.resolve({canEdit:()=>Promise.resolve(false)}):Promise.resolve(null)};
+})();
+</script>
+<title>Dossier Présidentielle 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout : barre translucide collante (titre + sections), grand titre par onglet, cartes groupées très arrondies sur fond gris clair.
+   Sur téléphone, barre d'onglets en bas comme une app. Police système (SF Pro sur les appareils Apple), Inter ailleurs. */
+:root{
+  --bg:#f5f5f7; --card:#ffffff; --elev:#ffffff; --sunk:#f2f2f7; --fill:rgb(118 118 128 / .12); --fill-2:rgb(118 118 128 / .2);
+  --ink:#1d1d1f; --ink-2:#6e6e73; --rule:#e2e2e7;
+  --pen:#0071e3; --pen-soft:rgb(0 113 227 / .1); --link:#0066cc; --btn:#0071e3; --btn-hover:#0077ed; --on-pen:#ffffff;
+  --bar:rgb(251 251 253 / .82); --seg:#ffffff; --scrim:rgb(0 0 0 / .32);
+  --shadow:0 1px 2px rgb(0 0 0 / .04),0 4px 18px rgb(0 0 0 / .05); --pop:0 12px 36px rgb(0 0 0 / .16);
+  --marker:#6e6e73; --on-marker:#ffffff; --ok:#34c759;
+  --vrai:#1b7a33; --vrai-soft:#e5f5e9; --faux:#d70015; --faux-soft:#fdeced;
+  --trompeur:#c93400; --trompeur-soft:#fff0e3; --nuancer:#5154cc; --nuancer-soft:#eeeefc; --warn:#c93400;
+  --ic-1:#5856d6; --ic-2:#ff9500; --ic-3:#34c759; --ic-4:#8e8e93; --ic-5:#007aff; --on-ic:#ffffff;
+  /* courbes des sondages : palette catégorielle validée (ordre fixe, couleur attachée à la personne) */
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --data:var(--body);
+  --r:18px; --r-sm:12px; --pill:980px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#000000; --card:#1c1c1e; --elev:#2c2c2e; --sunk:#2c2c2e; --fill:rgb(118 118 128 / .24); --fill-2:rgb(118 118 128 / .36);
+  --ink:#f5f5f7; --ink-2:#a1a1a6; --rule:#38383a;
+  --pen:#0a84ff; --pen-soft:rgb(10 132 255 / .18); --link:#2997ff; --btn:#0071e3; --btn-hover:#0077ed; --on-pen:#ffffff;
+  --bar:rgb(29 29 31 / .78); --seg:#636366; --scrim:rgb(0 0 0 / .55);
+  --shadow:none; --pop:0 12px 36px rgb(0 0 0 / .55);
+  --marker:#98989d; --on-marker:#000000; --ok:#30d158;
+  --vrai:#30d158; --vrai-soft:rgb(48 209 88 / .16); --faux:#ff6961; --faux-soft:rgb(255 69 58 / .17);
+  --trompeur:#ffb340; --trompeur-soft:rgb(255 159 10 / .17); --nuancer:#9d9bff; --nuancer-soft:rgb(94 92 230 / .24); --warn:#ffb340;
+  --ic-1:#5e5ce6; --ic-2:#ff9f0a; --ic-3:#30d158; --ic-4:#8e8e93; --ic-5:#0a84ff; --on-ic:#ffffff;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#0ca30c; --s7:#9085e9; --s8:#e66767;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#000000; --card:#1c1c1e; --elev:#2c2c2e; --sunk:#2c2c2e; --fill:rgb(118 118 128 / .24); --fill-2:rgb(118 118 128 / .36);
+  --ink:#f5f5f7; --ink-2:#a1a1a6; --rule:#38383a;
+  --pen:#0a84ff; --pen-soft:rgb(10 132 255 / .18); --link:#2997ff; --btn:#0071e3; --btn-hover:#0077ed; --on-pen:#ffffff;
+  --bar:rgb(29 29 31 / .78); --seg:#636366; --scrim:rgb(0 0 0 / .55);
+  --shadow:none; --pop:0 12px 36px rgb(0 0 0 / .55);
+  --marker:#98989d; --on-marker:#000000; --ok:#30d158;
+  --vrai:#30d158; --vrai-soft:rgb(48 209 88 / .16); --faux:#ff6961; --faux-soft:rgb(255 69 58 / .17);
+  --trompeur:#ffb340; --trompeur-soft:rgb(255 159 10 / .17); --nuancer:#9d9bff; --nuancer-soft:rgb(94 92 230 / .24); --warn:#ffb340;
+  --ic-1:#5e5ce6; --ic-2:#ff9f0a; --ic-3:#30d158; --ic-4:#8e8e93; --ic-5:#0a84ff; --on-ic:#ffffff;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#0ca30c; --s7:#9085e9; --s8:#e66767;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.47;letter-spacing:-.011em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{font-family:var(--display);margin:0;line-height:1.12;text-wrap:balance;font-weight:700;letter-spacing:-.02em}
+p{margin:0}
+a{color:var(--link);text-underline-offset:2px;text-decoration-thickness:1px}
+button,input,select,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--pen) 55%,transparent);outline-offset:2px}
+.mono{font-family:var(--data);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.small{font-size:14px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* barre du haut */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--rule)}
+.bar-in{display:flex;align-items:center;gap:16px;min-height:52px}
+.logo{font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:-.025em;color:var(--ink);text-decoration:none;white-space:nowrap}
+.logo span{color:var(--pen)}
+.tabs{flex:1;min-width:0;display:flex;justify-content:flex-end}
+.tabs-in{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding-block:8px}
+.tabs-in::-webkit-scrollbar{display:none}
+.tabs-in a{padding:6px 12px;border-radius:var(--pill);text-decoration:none;color:var(--ink-2);font-size:14px;font-weight:500;white-space:nowrap}
+.tabs-in a:hover{color:var(--ink)}
+.tabs-in a[aria-current="page"]{color:var(--ink);background:var(--fill);font-weight:600}
+.icon-btn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;border:0;background:transparent;color:var(--pen);cursor:pointer;flex:none}
+.icon-btn:hover{background:var(--fill)}
+.icon-btn svg{width:20px;height:20px}
+@media (max-width:760px){.tabs{display:none}.bar-in{justify-content:space-between;min-height:48px}.logo{font-size:19px}}
+
+/* recherche */
+.tools{padding-block:20px 0;display:flex;flex-direction:column;gap:12px}
+.status{display:flex;gap:8px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:7px;border-radius:var(--pill);padding:5px 12px;font-size:13px;color:var(--ink-2);background:var(--fill);white-space:nowrap}
+.badge b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+.badge.warn{color:var(--warn);background:var(--trompeur-soft)}
+.badge.warn .dot{background:var(--warn)}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;width:18px;height:18px;transform:translateY(-50%);color:var(--ink-2);pointer-events:none}
+.search input{width:100%;height:44px;padding:0 14px 0 38px;border:0;border-radius:var(--r-sm);background:var(--fill);font-size:17px;-webkit-appearance:none;appearance:none}
+.search input::placeholder{color:var(--ink-2)}
+.search input:focus{outline:none;background:var(--card);box-shadow:0 0 0 3px color-mix(in srgb,var(--pen) 45%,transparent)}
+.quick{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.quick .lbl{font-size:13px;color:var(--ink-2)}
+@media (max-width:760px){.quick,.status{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.quick::-webkit-scrollbar,.status::-webkit-scrollbar{display:none}.quick>*,.status>*{flex:none}}
+
+/* pages */
+main .wrap{padding-block:28px 80px;display:flex;flex-direction:column;gap:32px}
+.view-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 16px;flex-wrap:wrap}
+.view-head h2{font-size:clamp(30px,4.6vw,40px);letter-spacing:-.028em}
+.view-head p{margin-top:8px;color:var(--ink-2);max-width:62ch;font-size:17px}
+.sec{font-size:22px;letter-spacing:-.022em;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.more{font-family:var(--body);font-size:15px;font-weight:400;letter-spacing:-.01em;text-decoration:none;color:var(--link)}
+.more:hover{text-decoration:underline}
+
+/* contrôles */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;background:var(--fill);color:var(--link);padding:8px 16px;border-radius:var(--pill);cursor:pointer;font-weight:500;font-size:15px;text-decoration:none;white-space:nowrap;line-height:1.25}
+.btn:hover{background:var(--fill-2)}
+.btn.primary{background:var(--btn);color:var(--on-pen)}
+.btn.primary:hover{background:var(--btn-hover)}
+.btn.danger{color:var(--faux)}
+.btn.ghost{background:transparent;color:var(--link);padding:4px 8px;font-size:14px}
+.btn.ghost:hover{background:var(--fill)}
+.btn svg{width:10px;height:10px}
+.link{background:none;border:0;padding:0;color:var(--link);cursor:pointer;font-weight:600;text-align:left}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:0;background:var(--fill);padding:7px 14px;border-radius:var(--pill);cursor:pointer;font-size:14px;font-weight:500;color:var(--ink)}
+.chip:hover{background:var(--fill-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chip .n{font-size:12px;opacity:.7;margin-left:4px;font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px}
+.seg button{border:0;background:transparent;padding:6px 14px;min-width:64px;border-radius:8px;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--seg);font-weight:600;box-shadow:0 3px 8px rgb(0 0 0 / .12),0 3px 1px rgb(0 0 0 / .04)}
+.tag{display:inline-flex;align-items:center;font-size:12px;font-weight:600;padding:3px 9px;border-radius:var(--pill);background:var(--fill);color:var(--ink-2);white-space:nowrap;letter-spacing:0}
+.tag.officiel,.tag.declare{background:var(--vrai-soft);color:var(--vrai)}
+.tag.presse{background:var(--pen-soft);color:var(--link)}
+.tag.verifier,.tag.pressenti{background:var(--trompeur-soft);color:var(--trompeur)}
+.tag.retire{background:var(--faux-soft);color:var(--faux)}
+.ts{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;text-decoration:none;color:var(--link);background:var(--pen-soft);padding:3px 10px;border-radius:var(--pill);white-space:nowrap}
+.ts svg{width:8px;height:8px}
+
+/* cartes */
+.card{background:var(--card);border:0;border-radius:var(--r);padding:20px;min-width:0;box-shadow:var(--shadow)}
+@media (max-width:760px){.card{padding:16px}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:16px}
+.grid.g4{grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr))}
+.stack{display:flex;flex-direction:column;gap:12px}
+.two{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:880px){.two{grid-template-columns:minmax(0,1fr)}}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.group-title{font-family:var(--body);font-size:13px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.03em;padding-left:4px;margin-bottom:-6px}
+
+/* verdicts : pastille + pictogramme */
+.v-vrai{--v:var(--vrai);--vs:var(--vrai-soft);--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10.5l4 4 8-9'/%3E%3C/svg%3E")}
+.v-faux{--v:var(--faux);--vs:var(--faux-soft);--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M5 5l10 10M15 5L5 15'/%3E%3C/svg%3E")}
+.v-trompeur{--v:var(--trompeur);--vs:var(--trompeur-soft);--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M10 3.5v8.5'/%3E%3Ccircle cx='10' cy='16.3' r='1.4' fill='black' stroke='none'/%3E%3C/svg%3E")}
+.v-nuancer{--v:var(--nuancer);--vs:var(--nuancer-soft);--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M10 3v9M5.5 7.5h9M5 16h10'/%3E%3C/svg%3E")}
+.fc{display:flex;flex-direction:column;gap:10px}
+.fc-top{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap}
+.stamp{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:14px;color:var(--v,var(--ink-2));background:var(--vs,var(--fill));border-radius:var(--pill);padding:4px 12px 4px 9px;white-space:nowrap}
+.stamp::before{content:"";width:14px;height:14px;flex:none;background:currentColor;-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
+.vlabel{display:inline-flex;align-items:center;font-weight:600;font-size:12px;color:var(--v);background:var(--vs);border-radius:var(--pill);padding:2px 9px;margin-right:6px}
+.fc-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;min-width:0}
+.fc .quote{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.32;letter-spacing:-.016em;text-wrap:pretty}
+.fc .quote q{quotes:"« " " »"}
+.fc .why{font-size:15px;line-height:1.5}
+.fc-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:2px}
+.acts{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.src{font-size:13px;color:var(--ink-2);overflow-wrap:anywhere}
+
+/* chiffres */
+.stat{display:flex;flex-direction:column;gap:10px}
+.stat-top{display:flex;justify-content:space-between;gap:8px;align-items:start}
+.label{font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2)}
+.val{font-family:var(--display);font-weight:700;font-size:26px;line-height:1.18;letter-spacing:-.022em}
+.hl{background:none;padding:0}
+.use{background:var(--sunk);border-radius:var(--r-sm);padding:10px 12px;font-size:14px}
+.use b,.pc b{display:block;font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2);margin-bottom:2px}
+.stat-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto}
+
+/* mesures */
+.measure{display:flex;flex-direction:column;gap:10px}
+.measure h4{font-size:17px;letter-spacing:-.016em;line-height:1.3}
+.m-head{display:flex;justify-content:space-between;gap:8px;align-items:start;flex-wrap:wrap}
+.m-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.cost{font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.pc{grid-template-columns:1fr}}
+.pc div{background:var(--sunk);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;min-width:0}
+.pc ul{margin:4px 0 0;padding-left:18px}
+.coince{font-size:14px;background:var(--trompeur-soft);border-radius:var(--r-sm);padding:10px 12px}
+.coince b{display:block;color:var(--trompeur);font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;margin-bottom:2px}
+
+/* candidats */
+.cand{display:flex;flex-direction:column;gap:8px;text-align:left;cursor:pointer;font:inherit;color:inherit;width:100%}
+.cand:hover{box-shadow:var(--pop);background:var(--elev)}
+.cand-top,.cand-party,.cand-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cand-top{justify-content:space-between;flex-wrap:nowrap}
+.cand-name{font-family:var(--display);font-weight:700;font-size:20px;line-height:1.15;letter-spacing:-.022em}
+.cand-party{color:var(--ink-2);font-size:14px}
+.cand-sum{font-size:14px;display:block}
+.cand-foot{justify-content:space-between;font-size:13px;color:var(--ink-2)}
+.arc{flex:none}
+
+/* comparer */
+.table-scroll{overflow-x:auto;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow)}
+table.cmp{border-collapse:collapse;width:100%;min-width:660px}
+table.cmp th,table.cmp td{padding:12px 16px;border-bottom:1px solid var(--rule);vertical-align:top;text-align:left}
+table.cmp tr:last-child>*{border-bottom:0}
+table.cmp th{width:190px;font-weight:600}
+table.cmp thead th{font-size:13px;color:var(--ink-2)}
+.m-item{display:flex;flex-direction:column;gap:4px}
+.m-item+.m-item{border-top:1px solid var(--rule);margin-top:10px;padding-top:10px}
+.m-title{font-weight:600}
+
+/* débats */
+.debate{display:flex;flex-direction:column;gap:18px}
+.debate-head{display:flex;flex-direction:column;gap:10px}
+.debate-head h3{font-size:28px;letter-spacing:-.026em}
+.debate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:16px;align-items:start}
+.card h3{letter-spacing:-.022em}
+.card h4{font-size:17px;letter-spacing:-.016em;margin-bottom:12px}
+ol.chapters{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+ol.chapters li{display:grid;grid-template-columns:5.6em 1fr;gap:10px;align-items:baseline;font-size:15px}
+.moments{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:15px}
+.speak{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.speak li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--rule);padding-block:8px}
+.speak li:first-child{padding-top:0}
+.speak li:last-child{border-bottom:0;padding-bottom:0}
+
+/* accueil */
+.intro{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 32px;align-items:end}
+@media (max-width:760px){.intro{grid-template-columns:minmax(0,1fr)}}
+.intro h1{font-size:clamp(34px,5.4vw,56px);letter-spacing:-.032em;line-height:1.05}
+.intro p{margin-top:12px;max-width:56ch;color:var(--ink-2);font-size:clamp(17px,1.6vw,20px);line-height:1.45}
+.countdown{display:flex;flex-direction:column;gap:2px;min-width:220px}
+.cd-num{font-family:var(--display);font-weight:700;font-size:52px;line-height:1.05;letter-spacing:-.035em;color:var(--pen)}
+
+/* tendances */
+.filters-row{display:flex;gap:12px 18px;flex-wrap:wrap;align-items:center}
+.range{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:15px;color:var(--ink-2)}
+.range input{padding:6px 10px;border:0;border-radius:8px;background:var(--fill);color:var(--ink);font-size:16px}
+.lchip{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--fill);color:var(--ink);padding:6px 12px;border-radius:var(--pill);cursor:pointer;font-size:14px;font-weight:500}
+.lchip:hover{background:var(--fill-2)}
+.lchip .key{width:14px;height:3px;border-radius:2px;flex:none}
+.lchip[aria-pressed="false"]{color:var(--ink-2);text-decoration:line-through;background:transparent;box-shadow:inset 0 0 0 1px var(--rule)}
+.lchip[aria-pressed="false"] .key{opacity:.3}
+.chart-box{position:relative;outline:none}
+.chart-box:focus-visible{outline:3px solid color-mix(in srgb,var(--pen) 55%,transparent);outline-offset:4px;border-radius:8px}
+.chart-box svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.chart-box .ax{font-family:var(--data);font-size:11px;fill:var(--ink-2);font-variant-numeric:tabular-nums}
+.chart-box .evn{font-family:var(--data);font-size:10px;font-weight:700;fill:var(--on-marker);font-variant-numeric:tabular-nums}
+.chart-box .dl{font-size:12px;font-weight:600;fill:var(--ink)}
+.ttip{position:absolute;top:0;left:0;min-width:170px;max-width:250px;background:var(--elev);border:1px solid var(--rule);border-radius:12px;padding:10px 12px;font-size:13px;box-shadow:var(--pop);pointer-events:none;z-index:2;display:flex;flex-direction:column;gap:3px}
+.ttip .tt-h{font-weight:600}
+.ttip .tt-s{color:var(--ink-2);font-size:12px}
+.ttip .tt-r{display:flex;align-items:center;gap:8px}
+.ttip .tt-r i{width:14px;height:2px;border-radius:1px;flex:none}
+.ttip .tt-r b{font-variant-numeric:tabular-nums;min-width:3.8em}
+ol.chrono{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+ol.chrono li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start}
+.evnum{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--marker);color:var(--on-marker);font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.evnum.off{background:var(--fill);color:var(--ink-2)}
+details>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:"";width:7px;height:7px;margin:0 4px 0 auto;border-right:2px solid var(--ink-2);border-bottom:2px solid var(--ink-2);transform:rotate(45deg) translate(-2px,-2px)}
+details[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+table.polls{min-width:720px}
+table.polls th{width:auto;white-space:nowrap;font-weight:600;font-size:13px}
+table.polls td{font-size:14px}
+table.polls .num{text-align:right;white-space:nowrap;padding-inline:8px}
+table.polls tr.has-note>td{border-bottom:0;padding-bottom:4px}
+table.polls tr.note>td{padding-top:0}
+table.polls tr.note .src{margin-top:4px}
+.scores{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px 12px}
+.scores label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600}
+.scores input{padding:9px 10px;border:1px solid var(--rule);border-radius:10px;background:var(--card);font-size:16px;font-weight:400}
+
+/* actu du jour */
+.actu-head{display:flex;flex-direction:column;gap:4px}
+/* sujets secondaires en colonnes de journal : aucune carte ne reste seule sur une ligne */
+.actu-cols{columns:3 300px;column-gap:16px;margin-bottom:-16px}
+.actu-cols>.actu-item{break-inside:avoid;margin-bottom:16px}
+.actu-item{display:flex;flex-direction:column;gap:8px}
+.actu-item h3{font-size:18px;line-height:1.25;letter-spacing:-.018em}
+.actu-item p{font-size:15px;line-height:1.5}
+.actu-item.big{grid-column:1/-1}
+.actu-item.big h3{font-size:clamp(22px,2.6vw,28px);letter-spacing:-.026em}
+.actu-item.big p{font-size:17px;max-width:70ch}
+.chip.mini{padding:3px 10px;font-size:12px;font-weight:600}
+.unes{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.unes::-webkit-scrollbar{display:none}
+.une{flex:none;width:min(260px,80vw);background:var(--card);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;line-height:1.35;box-shadow:var(--shadow)}
+.une b{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-bottom:2px}
+.actu-old ul{margin:4px 0 0;padding-left:18px;font-size:14px}
+.actu-old li+li{margin-top:2px}
+
+.empty{background:var(--card);border-radius:var(--r);padding:28px;text-align:center;color:var(--ink-2);box-shadow:var(--shadow)}
+.card .empty{box-shadow:none;background:var(--sunk)}
+.notice{background:var(--fill);border-radius:var(--r-sm);padding:12px 14px;font-size:14px}
+
+/* feuilles et panneaux */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--bg);z-index:21;overflow-y:auto;overscroll-behavior:contain;box-shadow:var(--pop);
+  padding:calc(20px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(48px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px}
+@media (max-width:760px){
+  .drawer{top:calc(10px + env(safe-area-inset-top,0px));left:0;width:100%;border-radius:14px 14px 0 0;padding-top:30px}
+  .drawer::before{content:"";position:absolute;top:8px;left:50%;width:36px;height:5px;border-radius:3px;background:var(--fill-2);transform:translateX(-50%)}
+  .drawer.compact{top:auto;max-height:88%}
+}
+.drawer-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.drawer h2{font-size:28px;letter-spacing:-.026em}
+.list{display:flex;flex-direction:column;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.list a{display:flex;align-items:center;gap:12px;padding:11px 16px;color:var(--ink);text-decoration:none;font-size:17px;position:relative}
+.list a+a::before{content:"";position:absolute;top:0;right:0;left:58px;height:1px;background:var(--rule)}
+.list a:hover{background:var(--fill)}
+.list a[aria-current="page"]{font-weight:600}
+.list .ico{display:grid;place-items:center;width:30px;height:30px;border-radius:7px;color:var(--on-ic);flex:none}
+.list .ico svg{width:19px;height:19px}
+.list .chev{margin-left:auto;width:8px;height:14px;color:var(--ink-2)}
+.form{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px;border:0;padding:0;margin:0;min-width:0}
+.field>label,.field>legend{font-weight:600;font-size:13px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.03em;padding:0 4px}
+.field .hint{font-size:12px;color:var(--ink-2);padding:0 4px}
+.field input:not([type=checkbox]),.field select,.field textarea{padding:11px 12px;border:1px solid var(--rule);border-radius:10px;background:var(--card);width:100%;font-size:16px}
+.field textarea{min-height:96px;resize:vertical}
+.checks{display:flex;flex-wrap:wrap;gap:6px 16px}
+.checks label{display:flex;gap:6px;align-items:center;font-size:15px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:var(--pill);z-index:40;font-weight:500;font-size:15px;max-width:calc(100% - 32px);box-shadow:var(--pop)}
+
+/* barre d'onglets (téléphone) */
+.tabbar{display:none}
+@media (max-width:760px){
+  main .wrap{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+  .tabbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:8;
+    padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+    background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:1px solid var(--rule)}
+  .tabbar a,.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px 0;border:0;background:none;color:var(--ink-2);font-size:10px;font-weight:500;letter-spacing:0;line-height:1.2;text-decoration:none;cursor:pointer;min-width:0}
+  .tabbar svg{width:25px;height:25px}
+  .tabbar span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tabbar [aria-current="page"]{color:var(--pen)}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
+
+@media (prefers-reduced-motion:no-preference){
+  .cand{transition:box-shadow .2s ease,background-color .2s ease}
+  .scrim{animation:fade .2s ease-out}
+  .drawer{animation:slide .3s cubic-bezier(.32,.72,0,1)}
+  @keyframes fade{from{opacity:0}}
+  @keyframes slide{from{transform:translateX(48px);opacity:.5}}
+  @keyframes rise{from{transform:translateY(36%)}}
+  @media (max-width:760px){.drawer{animation-name:rise}}
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="logo" href="#une">Dossier <span>2027</span></a>
+    <nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs">
+      <a href="#une">À la une</a><a href="#tendances">Tendances</a><a href="#verifs">Vrai / Faux</a><a href="#candidats">Candidats</a><a href="#comparer">Comparer</a><a href="#debats">Débats</a><a href="#chiffres">Chiffres</a><a href="#journal">Journal</a><a href="#methode">Méthode</a>
+    </div></nav>
+    <button class="icon-btn" id="searchBtn" type="button" aria-label="Rechercher"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
+  </div>
+</header>
+<div class="wrap tools">
+  <div class="status">
+    <span class="badge" id="countBadge">Premier tour le 18 avril 2027</span>
+    <span class="badge" id="autoBadge"><span class="dot"></span><span id="autoTxt">Mise à jour automatique chaque matin</span></span>
+  </div>
+  <form class="search" id="searchForm" role="search">
+    <label class="sr" for="q">Recherche rapide</label>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+    <input id="q" type="search" autocomplete="off" placeholder="Mode débat : sujet, chiffre ou nom">
+  </form>
+  <div class="quick" id="quick"></div>
+</div>
+<main><div class="wrap" id="view"></div></main>
+<nav class="tabbar" id="tabbar" aria-label="Sections principales">
+  <a href="#une" data-tab="une"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.2 12 3.5l8.5 6.7V19a1.5 1.5 0 0 1-1.5 1.5h-4.2v-6h-5.6v6H5A1.5 1.5 0 0 1 3.5 19z"/></svg><span>À la une</span></a>
+  <a href="#tendances" data-tab="tendances"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 3.5v17h17"/><path d="m7.5 15 4-4.5 3 3 5.5-6.5"/></svg><span>Tendances</span></a>
+  <a href="#verifs" data-tab="verifs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.75"/><path d="m8.3 12.2 2.6 2.6 5-5.6"/></svg><span>Vrai/Faux</span></a>
+  <a href="#candidats" data-tab="candidats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.8 19.5a6.2 6.2 0 0 1 12.4 0"/><path d="M15.5 4.7a3.4 3.4 0 0 1 0 6.6"/><path d="M17.6 13.6a6.2 6.2 0 0 1 3.6 5.9"/></svg><span>Candidats</span></a>
+  <button type="button" id="moreBtn" data-more><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.75" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="16" cy="12" r="1.3" fill="currentColor"/></svg><span>Plus</span></button>
+</nav>
+<div id="overlay" hidden></div>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script>
+const PLAY='<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1l7 4-7 4z" fill="currentColor"/></svg>';
+const THEMES={retraites:"Retraites",pouvoirachat:"Pouvoir d'achat & prix",budget:"Budget & dette",fiscalite:"Impôts & fiscalité",travail:"Travail & salaires",solidarite:"Pauvreté & solidarité",logement:"Logement",immigration:"Immigration",securite:"Sécurité & justice",ecologie:"Écologie & énergie",europe:"Europe & international",defense:"Ukraine & défense",institutions:"Institutions",education:"Éducation & jeunesse",sante:"Santé"};
+const BORDS={gr:"Gauche radicale",g:"Gauche",c:"Centre",d:"Droite",ed:"Extrême droite",x:"Autres"};
+const BORD_POS={gr:.08,g:.27,c:.5,d:.72,ed:.92,x:null};
+const STATUTS={declare:"Déclaré",pressenti:"Pressenti",retire:"Retiré"};
+const FIAB={officiel:"Source primaire",presse:"Presse",verifier:"À vérifier"};
+const VERDICTS={vrai:"Vrai",faux:"Faux",trompeur:"Trompeur",nuancer:"À nuancer"};
+const COLS={candidats:"cand",mesures:"mes",chiffres:"chif",arguments:"args",debats:"deb",journal:"jour",sondages:"sond",evenements:"evt",actus:"actu"};
+const QUICK=["Ukraine","OTAN","Retraites","TVA","CSG","Logement","Dette","SMIC","Pauvreté","Immigration"];
+const TOUR1="2027-04-18";
+/* Ordre = ordre de la palette validée ; chaque personne garde sa couleur, quels que soient les filtres. */
+const SERIES=[{id:"lepen"},{id:"bardella"},{id:"philippe"},{id:"attal"},{id:"glucksmann"},{id:"zemmour"},{id:"retailleau"},{id:"melenchon"}];
+const NOMS_EXTRA={bardella:"Jordan Bardella",hollande:"François Hollande"};
+const TYPES_EVT={candidature:"Candidature",debat:"Débat",justice:"Justice",programme:"Programme",calendrier:"Calendrier",autre:"Autre"};
+
+const S={cand:[],mes:[],chif:[],args:[],deb:[],jour:[],sond:[],evt:[],actu:[],
+  loaded:{cand:false,mes:false,chif:false,args:false,deb:false,jour:false,sond:false,evt:false,actu:false},
+  db:null,canEdit:false,offline:false,openCand:null,
+  f:{bord:"all",retires:false,theme:"pouvoirachat",chif:"all",verdict:"all",auteur:"all",periode:"tout",du:"",au:"",masques:[],actuOuvert:false}};
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm=s=>String(s??"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const arr=v=>Array.isArray(v)?v:[];
+const pad=n=>String(n).padStart(2,"0");
+function fmtDate(d,long){if(!d)return"";const t=new Date(/^\d{4}-\d{2}-\d{2}$/.test(d)?d+"T12:00:00":d);return isNaN(t)?esc(d):t.toLocaleDateString("fr-FR",{day:"numeric",month:long?"long":"short",year:"numeric"})}
+function fmtTime(s){s=Math.max(0,Math.round(Number(s)||0));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?`${h}:${pad(m)}:${pad(x)}`:`${m}:${pad(x)}`}
+function parseTime(v){v=String(v??"").trim();if(!v)return null;if(/^\d+$/.test(v))return Number(v);const p=v.split(":").map(Number);if(p.some(n=>isNaN(n)))return null;return p.reduce((a,b)=>a*60+b,0)}
+function vidAt(url,t){if(!url)return"";if(t==null)return url;try{const u=new URL(url);u.searchParams.set("t",Math.round(t)+"s");return u.toString()}catch{return url}}
+function daysTo(iso){const t=new Date(iso+"T00:00:00"),n=new Date();n.setHours(0,0,0,0);return Math.round((t-n)/864e5)}
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2600)}
+const candById=id=>S.cand.find(c=>c.id===id);
+const candName=id=>candById(id)?.nom||id||"";
+const debById=id=>S.deb.find(d=>d.id===id);
+const tour1=()=>{const d=S.chif.find(f=>f.id==="premier-tour");return d&&/^\d{4}-\d{2}-\d{2}$/.test(d.iso||"")?d.iso:TOUR1};
+function sortCand(a){const o=Object.keys(BORDS);return [...a].sort((x,y)=>o.indexOf(x.bord)-o.indexOf(y.bord)||(x.ordre??99)-(y.ordre??99)||String(x.nom).localeCompare(y.nom))}
+function sortChecks(list){return [...list].sort((a,b)=>String(debById(b.debat)?.date||"").localeCompare(String(debById(a.debat)?.date||""))||((a.moment??1e9)-(b.moment??1e9))||String(b.maj||"").localeCompare(String(a.maj||"")))}
+const byDateDesc=k=>(a,b)=>String(b[k]||"").localeCompare(String(a[k]||""));
+function lastUpdate(){let m="";for(const l of [S.cand,S.mes,S.chif,S.args,S.deb,S.jour])for(const d of l)if(d.maj&&d.maj>m)m=d.maj;return m}
+
+function srcLinks(list){list=arr(list);if(!list.length)return"";return `<div class="src">Sources : ${list.map(s=>s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.titre||s.url)}</a>`:esc(s.titre)).join(" · ")}</div>`}
+function arcSvg(b){const p=BORD_POS[b];if(p==null)return"";const a=Math.PI*(1-p),cx=22+18*Math.cos(a),cy=22-18*Math.sin(a);
+  return `<svg class="arc" width="44" height="26" viewBox="0 0 44 26" role="img" aria-label="${esc(BORDS[b])}"><path d="M4 22 A18 18 0 0 1 40 22" fill="none" stroke="var(--rule)" stroke-width="3" stroke-linecap="round"/><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4.5" fill="var(--ink)"/></svg>`}
+const statutTag=s=>`<span class="tag ${esc(s)}">${esc(STATUTS[s]||s||"")}</span>`;
+const fiabTag=f=>f?`<span class="tag ${esc(f)}">${esc(FIAB[f]||f)}</span>`:"";
+const themeTag=t=>t?`<span class="tag">${esc(THEMES[t]||t)}</span>`:"";
+function tsLink(item,prefix){const d=item.debat?debById(item.debat):null;if(!d||!d.video||item.moment==null)return"";return `<a class="ts" href="${esc(vidAt(d.video,item.moment))}" target="_blank" rel="noopener" title="Voir ce moment de la vidéo">${PLAY}${prefix?esc(prefix)+" ":""}${fmtTime(item.moment)}</a>`}
+const editBtn=(col,id)=>S.canEdit?`<button class="btn ghost" data-edit="${col}" data-id="${esc(id)}">Modifier</button>`:"";
+const addBtn=(col,label)=>S.canEdit?`<button class="btn primary" data-edit="${col}">${esc(label)}</button>`:"";
+function loadingOr(key,html,emptyMsg){
+  if(S.offline)return `<div class="empty">Les données n'ont pas pu être chargées. Vérifie ta connexion puis recharge la page.</div>`;
+  if(!S.loaded[key])return `<div class="empty">Chargement…</div>`;
+  return html||`<div class="empty">${esc(emptyMsg)}</div>`}
+
+/* ---------- composants ---------- */
+function factCard(a,o={}){
+  const d=a.debat?debById(a.debat):null;
+  return `<article class="card fc v-${esc(a.verdict)}">
+    <div class="fc-top"><span class="stamp">${esc(VERDICTS[a.verdict]||a.verdict||"")}</span>
+      <div class="fc-meta">${a.auteur?`<button class="link" data-open="${esc(a.auteur)}">${esc(candName(a.auteur))}</button>`:`<span class="muted">Idée reçue</span>`}${tsLink(a)}${d&&o.showDeb!==false?`<span class="muted small">${esc(d.titre)}</span>`:""}</div></div>
+    <p class="quote"><q>${esc(a.affirmation)}</q></p>
+    <p class="why">${esc(a.explication)}</p>
+    <div class="fc-foot">${srcLinks(a.sources)}<span class="acts">${themeTag(a.theme)}<button class="btn ghost" data-copyfc="${esc(a.id)}">Copier</button>${editBtn("arguments",a.id)}</span></div>
+  </article>`}
+function statCard(f){
+  return `<article class="card stat">
+    <div class="stat-top"><span class="label">${esc(f.libelle)}</span>${editBtn("chiffres",f.id)}</div>
+    <div class="val"><span class="hl">${esc(f.valeur)}</span></div>
+    ${f.precision?`<p class="small">${esc(f.precision)}</p>`:""}
+    ${f.usage?`<div class="use"><b>À sortir quand…</b>${esc(f.usage)}</div>`:""}
+    <div class="stat-foot"><span class="src">${f.url?`<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.source||"Source")}</a>`:esc(f.source||"")}${f.date?` · ${esc(f.date)}`:""}</span><button class="btn ghost" data-copy="${esc(f.id)}">Copier</button></div>
+  </article>`}
+function measureBlock(m,showCand){
+  const pour=arr(m.pour),contre=arr(m.contre);
+  return `<article class="card measure">
+    <div class="m-head"><h4>${showCand?`<button class="link" data-open="${esc(m.candidat)}">${esc(candName(m.candidat))}</button> · `:""}${esc(m.titre)}</h4>
+      <span class="m-tags">${themeTag(m.theme)}${fiabTag(m.fiabilite)}${editBtn("mesures",m.id)}</span></div>
+    ${m.detail?`<p>${esc(m.detail)}</p>`:""}
+    ${m.cout?`<p class="cost">Coût / impact : ${esc(m.cout)}</p>`:""}
+    ${(pour.length||contre.length)?`<div class="pc"><div><b>Arguments pour</b><ul>${pour.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div><b>Arguments contre</b><ul>${contre.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`:""}
+    ${m.coince?`<p class="coince"><b>Ce qui coince</b>${esc(m.coince)}</p>`:""}
+    <div class="row">${srcLinks(m.sources)||"<span></span>"}${tsLink(m,"Au débat,")}</div>
+  </article>`}
+function candCard(c){
+  const nm=S.mes.filter(m=>m.candidat===c.id).length,nv=S.args.filter(a=>a.auteur===c.id).length;
+  return `<button class="card cand" data-open="${esc(c.id)}">
+    <span class="cand-top"><span class="cand-name">${esc(c.nom)}</span>${arcSvg(c.bord)}</span>
+    <span class="cand-party">${esc(c.parti)} ${statutTag(c.statut)}</span>
+    ${c.resume?`<span class="cand-sum">${esc(c.resume)}</span>`:""}
+    <span class="cand-foot"><span>${nm} mesure${nm>1?"s":""}${nv?` · ${nv} vérification${nv>1?"s":""}`:""}</span>${c.sondage?`<span class="mono">${esc(c.sondage)}</span>`:""}</span>
+  </button>`}
+function debateMini(d){
+  const n=S.args.filter(a=>a.debat===d.id).length;
+  return `<article class="card stack">
+    <span class="mono small muted">${fmtDate(d.date)}${d.chaine?` · ${esc(d.chaine)}`:""}</span>
+    <h3>${esc(d.titre)}</h3>
+    ${d.sujet?`<p class="muted">${esc(d.sujet)}</p>`:""}
+    <div class="chips">${arr(d.participants).map(id=>`<button class="chip" data-open="${esc(id)}">${esc(candName(id))}</button>`).join("")}</div>
+    <div class="actions"><a class="btn primary" href="#debats">${arr(d.chapitres).length} chapitres · ${n} vérifications</a>${d.video?`<a class="btn" href="${esc(d.video)}" target="_blank" rel="noopener">${PLAY}Vidéo</a>`:""}</div>
+  </article>`}
+function debateCard(d){
+  const chaps=arr(d.chapitres).slice().sort((a,b)=>(a.t||0)-(b.t||0));
+  const tp=d.tempsParole?arr(d.tempsParole.valeurs):[];
+  const checks=sortChecks(S.args.filter(a=>a.debat===d.id));
+  const moments=arr(d.tempsForts).map(t=>{const i=t.indexOf(" — ");return `<li>${i>0?`<b>${esc(t.slice(0,i))}.</b> ${esc(t.slice(i+3))}`:esc(t)}</li>`}).join("");
+  return `<article class="debate">
+    <header class="card debate-head">
+      <div class="row"><span class="mono small muted">${fmtDate(d.date,true)}${d.chaine?` · ${esc(d.chaine)}`:""}</span>${editBtn("debats",d.id)}</div>
+      <h3>${esc(d.titre)}</h3>
+      ${(d.sujet||d.lieu)?`<p class="muted">${esc([d.sujet,d.lieu].filter(Boolean).join(" · "))}</p>`:""}
+      <div class="chips">${arr(d.participants).map(id=>`<button class="chip" data-open="${esc(id)}">${esc(candName(id))}</button>`).join("")}</div>
+      ${d.absents?`<p class="small muted">Absents : ${esc(d.absents)}</p>`:""}
+      ${d.video?`<div class="actions"><a class="btn primary" href="${esc(d.video)}" target="_blank" rel="noopener">${PLAY}Voir la vidéo</a></div>`:""}
+    </header>
+    <div class="debate-grid">
+      ${chaps.length?`<section class="card"><h4>Chapitres</h4><ol class="chapters">${chaps.map(c=>`<li>${d.video?`<a class="ts" href="${esc(vidAt(d.video,c.t))}" target="_blank" rel="noopener">${fmtTime(c.t)}</a>`:`<span class="mono">${fmtTime(c.t)}</span>`}<span>${esc(c.titre)}</span></li>`).join("")}</ol></section>`:""}
+      ${moments?`<section class="card"><h4>Temps forts</h4><ul class="moments">${moments}</ul></section>`:""}
+      ${tp.length?`<section class="card"><h4>Temps de parole</h4>${d.tempsParole.note?`<p class="small muted" style="margin-bottom:10px">${esc(d.tempsParole.note)}</p>`:""}<ul class="speak">${tp.map(v=>`<li><span>${esc(candName(v.candidat))}</span><span class="mono">${fmtTime(v.secondes)}</span></li>`).join("")}</ul></section>`:""}
+    </div>
+    ${checks.length?`<h4 class="sec">Vérifié minute par minute <span class="muted mono small">${checks.length}</span></h4><div class="grid">${checks.map(a=>factCard(a,{showDeb:false})).join("")}</div>`:""}
+    ${d.limites?`<p class="notice">${esc(d.limites)}</p>`:""}
+    ${srcLinks(d.sources)}
+  </article>`}
+function journalEntry(j){
+  return `<article class="card stack">
+    <div class="row"><span class="mono small">${fmtDate(j.date,true)}</span>${j.auto?`<span class="tag officiel">automatique</span>`:`<span class="tag">avec toi</span>`}</div>
+    <h3>${esc(j.titre||"Mise à jour")}</h3>
+    ${j.resume?`<p>${esc(j.resume)}</p>`:""}
+    ${arr(j.details).length?`<ul class="moments">${arr(j.details).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+  </article>`}
+
+/* ---------- vues ---------- */
+/* ---------- actu du jour : revue de presse écrite chaque matin par la tâche automatique ---------- */
+function actuCard(it,big,date){
+  const cands=arr(it.candidats).filter(id=>candById(id));
+  const tags=(date?`<span class="mono small muted">${fmtDate(date)}</span>`:"")+(it.theme?themeTag(it.theme):"")+cands.map(id=>`<button class="chip mini" data-open="${esc(id)}">${esc(candName(id))}</button>`).join("");
+  return `<article class="card actu-item${big?" big":""}">
+    ${tags?`<div class="m-tags">${tags}</div>`:""}
+    <h3>${esc(it.titre||"")}</h3>
+    ${it.resume?`<p>${esc(it.resume)}</p>`:""}
+    ${arr(it.journaux).length?`<p class="small muted">À la une de : ${esc(arr(it.journaux).join(", "))}</p>`:""}
+    ${srcLinks(it.sources)}
+  </article>`}
+function actuSection(){
+  const list=S.actu.filter(a=>isIso(a.date)).sort((a,b)=>b.date.localeCompare(a.date)),a=list[0];
+  const unes=a?arr(a.unes).filter(u=>u&&u.journal&&u.titre):[];
+  const body=a?`${unes.length?`<div class="unes" aria-label="Les unes de la veille">${unes.map(u=>`<div class="une"><b>${esc(u.journal)}</b>${esc(u.titre)}</div>`).join("")}</div>`:""}${arr(a.items).length?actuCard(arr(a.items)[0],true):""}${arr(a.items).length>1?`<div class="actu-cols">${arr(a.items).slice(1).map(it=>actuCard(it,false)).join("")}</div>`:""}`:"";
+  return `<section class="stack actu">
+      <div class="actu-head"><h2 class="sec">Actu du jour</h2>${a?`<p class="small muted">${fmtDate(a.date,true)} · l'essentiel de la veille${a.titre?` : ${esc(a.titre)}`:""}</p>`:""}</div>
+      ${loadingOr("actu",body,"La première revue de l'actualité arrivera demain matin, vers 7 h.")}
+      ${list.length>1?`<details id="actuArchives"${S.f.actuOuvert?" open":""}><summary class="small">Jours précédents</summary><div class="stack" style="margin-top:10px">${list.slice(1,8).map(d=>`<div class="actu-old"><span class="mono small muted">${fmtDate(d.date,true)}</span><ul>${arr(d.items).map(it=>`<li>${esc(it.titre||"")}</li>`).join("")}</ul></div>`).join("")}</div></details>`:""}
+      <p class="small muted">Revue faite chaque matin vers 7 h à partir de la presse lisible par l'outil : Ouest-France, France Inter, Europe 1, Public Sénat, LCP, Euronews, Sud Radio, CNews, Le JDD et les dépêches AFP. Le Monde, Le Figaro et Libération bloquent la lecture automatique : leurs unes n'apparaissent que si une revue de presse les cite.</p>
+    </section>`}
+
+function viewUne(){
+  const days=daysTo(tour1());
+  const checks=sortChecks(S.args).slice(0,6);
+  let keys=S.chif.filter(f=>f.une);
+  if(keys.length<4)keys=keys.concat([...S.chif].filter(f=>!f.une).sort(byDateDesc("maj")));
+  keys=keys.slice(0,4);
+  const deb=[...S.deb].sort(byDateDesc("date"))[0];
+  const jr=[...S.jour].sort(byDateDesc("date")).slice(0,3);
+  return `<section class="intro">
+      <div><h1>Le dossier pour débattre de la présidentielle</h1><p>Les candidats, leurs mesures, ce qu'elles coûtent et des chiffres vérifiés pour appuyer ou démonter un argument. Pendant un débat, tape un sujet dans la barre de recherche.</p></div>
+      <div class="card countdown"><span class="label">Premier tour</span><b class="cd-num">${days>0?`J-${days}`:days===0?"Jour J":"Terminé"}</b><span class="small muted">${fmtDate(tour1(),true)}</span></div>
+    </section>
+    ${actuSection()}
+    <section class="stack"><h2 class="sec">Dernières vérifications <a class="more" href="#verifs">Tout voir</a></h2>
+      ${loadingOr("args",checks.length?`<div class="grid">${checks.map(a=>factCard(a)).join("")}</div>`:"","Aucune vérification pour l'instant.")}</section>
+    <section class="stack"><h2 class="sec">Chiffres à connaître <a class="more" href="#chiffres">Tous les chiffres</a></h2>
+      ${loadingOr("chif",keys.length?`<div class="grid g4">${keys.map(statCard).join("")}</div>`:"","Aucun chiffre enregistré.")}</section>
+    <div class="two">
+      <section class="stack"><h2 class="sec">Dernier débat <a class="more" href="#debats">Ouvrir</a></h2>${loadingOr("deb",deb?debateMini(deb):"","Aucun débat enregistré.")}</section>
+      <section class="stack"><h2 class="sec">Journal des mises à jour <a class="more" href="#journal">Tout voir</a></h2>${loadingOr("jour",jr.length?jr.map(journalEntry).join(""):"","La première mise à jour automatique apparaîtra ici.")}</section>
+    </div>`}
+
+/* ---------- tendances ---------- */
+const DAY=864e5;
+const toTime=iso=>Date.parse(String(iso).slice(0,10)+"T12:00:00Z");
+const isoOf=t=>new Date(t).toISOString().slice(0,10);
+const isIso=d=>/^\d{4}-\d{2}-\d{2}$/.test(d||"");
+function addMonths(iso,n){const d=new Date(toTime(iso));d.setUTCMonth(d.getUTCMonth()+n);return isoOf(d.getTime())}
+const num=v=>{if(v==null||v==="")return null;const n=Number(v);return isFinite(n)?n:null};
+const fmtPct=v=>(Math.round(v*10)/10).toLocaleString("fr-FR")+" %";
+const serieVar=id=>`var(--s${SERIES.findIndex(s=>s.id===id)+1})`;
+const nomSerie=id=>candById(id)?.nom||NOMS_EXTRA[id]||id;
+const nomCourt=id=>{const n=nomSerie(id),i=n.indexOf(" ");return i>0?n.slice(i+1):n};
+const moisCourt=t=>new Date(t).toLocaleDateString("fr-FR",{month:"short",year:"2-digit",timeZone:"UTC"});
+function tendRange(){
+  const ds=S.sond.map(p=>p.date).filter(isIso).sort(),today=isoOf(Date.now());
+  const last=ds.length&&ds[ds.length-1]>today?ds[ds.length-1]:today;
+  const first=ds.length?isoOf(toTime(ds[0])-7*DAY):addMonths(today,-6);
+  let from=first,to=last;const p=S.f.periode;
+  if(p==="3m")from=addMonths(to,-3);else if(p==="6m")from=addMonths(to,-6);else if(p==="12m")from=addMonths(to,-12);
+  else if(p==="perso"){from=isIso(S.f.du)?S.f.du:first;to=isIso(S.f.au)?S.f.au:last}
+  if(from>to)[from,to]=[to,from];
+  if(from===to)to=isoOf(toTime(from)+7*DAY);
+  return {from,to}}
+/* Moyenne lissée : chaque sondage pèse d'autant plus qu'il est proche (noyau gaussien, écart type de 21 jours). */
+function lisse(pts){
+  if(pts.length<2)return pts.map(o=>({t:o.t,v:o.v}));
+  const sig=21*DAY,out=[],moy=t=>{let w=0,s=0;for(const o of pts){const d=(o.t-t)/sig,k=Math.exp(-.5*d*d);w+=k;s+=k*o.v}return s/w};
+  for(let t=pts[0].t;t<pts[pts.length-1].t;t+=2*DAY)out.push({t,v:moy(t)});
+  out.push({t:pts[pts.length-1].t,v:moy(pts[pts.length-1].t)});
+  return out}
+let CH=null;
+function tendChart(W){
+  const narrow=W<560,H=narrow?300:380,{from,to}=tendRange(),tf=toTime(from),tt=toTime(to);
+  const polls=S.sond.filter(p=>isIso(p.date)).sort((a,b)=>a.date.localeCompare(b.date));
+  const series=SERIES.filter(s=>!S.f.masques.includes(s.id)).map(s=>{const pts=polls.map(p=>({t:toTime(p.date),v:num(p.scores&&p.scores[s.id])})).filter(o=>o.v!=null);return {...s,pts,tr:lisse(pts)}}).filter(s=>s.pts.some(o=>o.t>=tf&&o.t<=tt));
+  let vmax=0;for(const s of series)for(const o of s.pts)if(o.t>=tf&&o.t<=tt&&o.v>vmax)vmax=o.v;
+  const ymax=Math.max(20,Math.ceil((vmax+3)/10)*10);
+  const labels=!narrow&&series.length>0&&series.length<=4;
+  const m={l:44,r:labels?(narrow?104:128):14,t:46,b:28},pw=W-m.l-m.r,ph=H-m.t-m.b;
+  const x=t=>m.l+(t-tf)/(tt-tf)*pw,y=v=>m.t+(1-v/ymax)*ph;
+  let g=`<defs><clipPath id="plotClip"><rect x="${m.l}" y="${m.t-6}" width="${pw}" height="${ph+12}"/></clipPath></defs>`;
+  for(let v=0;v<=ymax;v+=10)g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)" stroke-width="1"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end" class="ax">${v}${v===ymax?" %":""}</text>`;
+  const months=[];let d=new Date(tf);d=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1,12));
+  while(d.getTime()<=tt){months.push(d.getTime());d=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1,12))}
+  const k=Math.max(1,Math.ceil(months.length/Math.max(2,Math.floor(pw/74))));
+  const ticks=months.length?months.filter((_,i)=>i%k===0):[tf,tt];
+  for(const t of ticks)g+=`<line x1="${x(t)}" x2="${x(t)}" y1="${m.t+ph}" y2="${m.t+ph+4}" stroke="var(--ink-2)" stroke-opacity=".6"/><text x="${x(t)}" y="${m.t+ph+18}" text-anchor="middle" class="ax">${esc(months.length?moisCourt(t):fmtDate(isoOf(t)))}</text>`;
+  g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${m.t+ph}" y2="${m.t+ph}" stroke="var(--ink-2)" stroke-opacity=".6" stroke-width="1"/>`;
+  const evts=S.evt.filter(e=>isIso(e.date)&&toTime(e.date)>=tf&&toTime(e.date)<=tt).sort((a,b)=>a.date.localeCompare(b.date));
+  /* Repères numérotés comme la chronologie ; des événements trop proches pour un rond chacun partagent une pastille « 8–10 ». */
+  const grp=[],by=30;
+  evts.forEach((e,i)=>{const ex=x(toTime(e.date)),last=grp[grp.length-1];if(last&&ex-last[last.length-1].ex<24)last.push({e,i,ex});else grp.push([{e,i,ex}])});
+  for(const it of grp){const a=it[0],b=it[it.length-1],lbl=it.length>1?`${a.i+1}–${b.i+1}`:`${a.i+1}`,w=it.length>1?lbl.length*6.4+12:18;
+    const cx=Math.min(W-w/2-1,Math.max(w/2+1,(a.ex+b.ex)/2));
+    for(const o of it)g+=`<line x1="${o.ex.toFixed(1)}" x2="${o.ex.toFixed(1)}" y1="${by+9}" y2="${m.t+ph}" stroke="var(--ink-2)" stroke-opacity=".3" stroke-width="1"/>`;
+    g+=`<g><rect x="${(cx-w/2).toFixed(1)}" y="${by-9}" width="${w.toFixed(1)}" height="18" rx="9" fill="var(--marker)"/><text x="${cx.toFixed(1)}" y="${by+3.5}" text-anchor="middle" class="evn">${lbl}</text><title>${esc(it.map(o=>`${o.i+1}. ${fmtDate(o.e.date)} : ${o.e.titre||""}`).join("\n"))}</title></g>`}
+  for(const s of series){const col=serieVar(s.id);
+    if(s.tr.length>1)g+=`<path clip-path="url(#plotClip)" d="${s.tr.map((o,i)=>`${i?"L":"M"}${x(o.t).toFixed(1)} ${y(o.v).toFixed(1)}`).join("")}" fill="none" style="stroke:${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    for(const o of s.pts)if(o.t>=tf&&o.t<=tt)g+=`<circle cx="${x(o.t).toFixed(1)}" cy="${y(o.v).toFixed(1)}" r="4" style="fill:${col}" fill-opacity=".55" stroke="var(--card)" stroke-width="2"/>`}
+  const lab=[];
+  for(const s of series){const inr=s.tr.filter(o=>o.t>=tf&&o.t<=tt),o=inr[inr.length-1];if(!o)continue;const ex=x(o.t),ey=y(o.v);
+    g+=`<circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="4.5" style="fill:${serieVar(s.id)}" stroke="var(--card)" stroke-width="2"/>`;
+    if(labels&&ex>=m.l+pw*.8)lab.push({ex,ey,txt:`${nomCourt(s.id)} ${fmtPct(o.v)}`})}
+  lab.sort((a,b)=>a.ey-b.ey);
+  if(lab.every((l,i)=>i===0||l.ey-lab[i-1].ey>=14))for(const l of lab)g+=`<text x="${(l.ex+9).toFixed(1)}" y="${(l.ey+4).toFixed(1)}" class="dl">${esc(l.txt)}</text>`;
+  g+=`<line id="xh" x1="0" x2="0" y1="${m.t}" y2="${m.t+ph}" stroke="var(--ink-2)" stroke-width="1" visibility="hidden"/>`;
+  CH={W,H,m,x,ids:series.map(s=>s.id),polls:polls.filter(p=>{const t=toTime(p.date);return t>=tf&&t<=tt})};
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Intentions de vote au premier tour du ${esc(fmtDate(from,true))} au ${esc(fmtDate(to,true))} : ${CH.polls.length} sondages. Le tableau des sondages suit le graphique.">${g}</svg>`}
+function bindTendances(){
+  const box=$("#tendBox");if(!box||!CH)return;
+  const svg=box.querySelector("svg"),tip=$("#ttip"),xh=svg&&svg.querySelector("#xh");if(!svg||!tip||!xh)return;
+  const dates=[...new Set(CH.polls.map(p=>p.date))];let cur=-1;
+  const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!=null)n.textContent=txt;return n};
+  const show=i=>{if(i<0||i>=dates.length)return;cur=i;const dte=dates[i],px=CH.x(toTime(dte));
+    xh.setAttribute("x1",px);xh.setAttribute("x2",px);xh.setAttribute("visibility","visible");
+    tip.replaceChildren();
+    for(const p of CH.polls.filter(q=>q.date===dte)){
+      tip.append(el("div","tt-h",`${fmtDate(dte)} · ${p.institut||"Sondage"}`));
+      if(p.commanditaire)tip.append(el("div","tt-s",`pour ${p.commanditaire}`));
+      const rows=CH.ids.map(id=>[id,num(p.scores&&p.scores[id])]).filter(r=>r[1]!=null).sort((a,b)=>b[1]-a[1]);
+      for(const [id,v] of rows){const r=el("div","tt-r"),key=el("i");key.style.background=serieVar(id);r.append(key,el("b",null,fmtPct(v)),el("span",null,nomCourt(id)));tip.append(r)}
+      const autres=Object.entries(p.scores||{}).filter(([id,v])=>!CH.ids.includes(id)&&num(v)!=null);
+      if(autres.length)tip.append(el("div","tt-s","Autres : "+autres.map(([id,v])=>`${nomCourt(id)} ${fmtPct(Number(v))}`).join(", ")));
+    }
+    tip.hidden=false;
+    const sc=box.clientWidth/CH.W,tw=tip.offsetWidth;let left=px*sc+14;if(left+tw>box.clientWidth)left=px*sc-tw-14;
+    tip.style.left=Math.max(0,left)+"px";tip.style.top=(CH.m.t*sc)+"px"};
+  const hide=()=>{tip.hidden=true;xh.setAttribute("visibility","hidden");cur=-1};
+  const nearest=clientX=>{const r=svg.getBoundingClientRect(),sx=(clientX-r.left)*CH.W/r.width;let bi=-1,bd=1e9;dates.forEach((dd,i)=>{const dist=Math.abs(CH.x(toTime(dd))-sx);if(dist<bd){bd=dist;bi=i}});return bi};
+  svg.addEventListener("pointermove",e=>show(nearest(e.clientX)));
+  svg.addEventListener("pointerdown",e=>show(nearest(e.clientX)));
+  svg.addEventListener("pointerleave",e=>{if(e.pointerType!=="touch")hide()});
+  box.addEventListener("keydown",e=>{if(!dates.length)return;
+    if(e.key==="ArrowRight"){e.preventDefault();show(cur<0?0:Math.min(dates.length-1,cur+1))}
+    else if(e.key==="ArrowLeft"){e.preventDefault();show(cur<0?dates.length-1:Math.max(0,cur-1))}
+    else if(e.key==="Escape")hide()});
+  box.addEventListener("blur",hide)}
+function pollTable(list){
+  const ids=SERIES.map(s=>s.id).filter(id=>list.some(p=>num(p.scores&&p.scores[id])!=null));
+  const ncol=3+ids.length+(S.canEdit?1:0);
+  /* Une ligne de chiffres par sondage, puis ses notes et sources sur toute la largeur. */
+  return `<table class="cmp polls"><thead><tr><th>Date</th><th>Institut</th>${ids.map(id=>`<th class="num">${esc(nomCourt(id))}</th>`).join("")}<th>Autres</th>${S.canEdit?"<th></th>":""}</tr></thead><tbody>${list.map(p=>{
+    const autres=Object.entries(p.scores||{}).filter(([id,v])=>!ids.includes(id)&&num(v)!=null).map(([id,v])=>`${nomCourt(id)} ${fmtPct(Number(v))}`).join(", ");
+    const note=[p.hypothese,p.fourchettes].filter(Boolean).join(" · "),sous=note||arr(p.sources).length;
+    return `<tr${sous?' class="has-note"':""}><td class="mono" style="white-space:nowrap">${fmtDate(p.date)}</td><td><b>${esc(p.institut||"")}</b>${p.commanditaire?`<div class="small muted">${esc(p.commanditaire)}</div>`:""}${p.fiabilite?`<div style="margin-top:4px">${fiabTag(p.fiabilite)}</div>`:""}</td>${ids.map(id=>{const v=num(p.scores&&p.scores[id]);return `<td class="num mono">${v==null?"–":fmtPct(v)}</td>`}).join("")}<td class="small">${esc(autres)}</td>${S.canEdit?`<td>${editBtn("sondages",p.id)}</td>`:""}</tr>${sous?`<tr class="note"><td></td><td colspan="${ncol-1}">${note?`<span class="small muted">${esc(note)}</span>`:""}${srcLinks(p.sources)}</td></tr>`:""}`}).join("")}</tbody></table>`}
+/* Le corps (graphique, chronologie, tableau) se redessine seul quand on tape une date : les champs de date ne sont pas recréés pendant la saisie. */
+function tendBody(){
+  const {from,to}=tendRange(),tf=toTime(from),tt=toTime(to);
+  /* largeur utile de la carte : celle de la page moins les marges intérieures de la carte (20 px, 16 px sur téléphone) */
+  const vw=$("#view"),cs=getComputedStyle(vw),pad=matchMedia("(max-width:760px)").matches?32:40,W=Math.max(280,Math.floor(vw.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-pad));
+  const shown=S.sond.filter(p=>isIso(p.date)&&toTime(p.date)>=tf&&toTime(p.date)<=tt).sort((a,b)=>b.date.localeCompare(a.date));
+  const dans=e=>isIso(e.date)&&toTime(e.date)>=tf&&toTime(e.date)<=tt;
+  const evts=S.evt.filter(dans).sort((a,b)=>a.date.localeCompare(b.date));
+  const hors=S.evt.filter(e=>!dans(e)).sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
+  const evItem=(e,n)=>`<li><span class="evnum${n?"":" off"}">${n||"–"}</span><div class="stack" style="gap:4px"><div class="row" style="justify-content:flex-start"><span class="mono small">${fmtDate(e.date,true)}</span>${e.type?`<span class="tag">${esc(TYPES_EVT[e.type]||e.type)}</span>`:""}${editBtn("evenements",e.id)}</div><b>${esc(e.titre||"")}</b>${e.detail?`<span class="small">${esc(e.detail)}</span>`:""}${srcLinks(e.sources)}</div></li>`;
+  CH=null;const svg=shown.length?tendChart(W):"";
+  return `<section class="card">
+      ${loadingOr("sond",shown.length?`<div class="chart-box" id="tendBox" tabindex="0" aria-describedby="tendNote">${svg}<div class="ttip" id="ttip" role="status" hidden></div></div>`:"","Aucun sondage enregistré sur cette période.")}
+      <p class="small muted" id="tendNote" style="margin-top:10px">Trait : moyenne lissée des sondages, chaque sondage pesant d'autant plus qu'il est proche (environ trois semaines). Points : chaque sondage. Les fourchettes sont ramenées à leur milieu et les hypothèses testées varient selon les instituts. Survole ou touche le graphique, ou utilise les flèches du clavier, pour lire un sondage. Une intention de vote n'est pas une prévision.</p>
+    </section>
+    <section class="card"><h4>Chronologie <span class="muted mono small">${evts.length}</span></h4>
+      ${loadingOr("evt",evts.length?`<ol class="chrono">${evts.map((e,i)=>evItem(e,i+1)).join("")}</ol>`:`<p class="small muted">Aucun événement sur cette période.</p>`,"")}
+      ${hors.length?`<details id="horsDetails" style="margin-top:14px"${S.f.horsOuvert?" open":""}><summary class="small">${hors.length} événement${hors.length>1?"s":""} hors de la période choisie</summary><ol class="chrono" style="margin-top:12px">${hors.map(e=>evItem(e,0)).join("")}</ol></details>`:""}
+    </section>
+    <details class="card" id="pollsDetails"${S.f.tableOuvert?" open":""}><summary><b>Tableau des sondages</b> <span class="muted small">${shown.length} sur la période</span></summary>
+      <div class="table-scroll" style="margin-top:12px">${pollTable(shown)}</div>
+    </details>`}
+function viewTendances(){
+  const {from,to}=tendRange();
+  const avecDonnees=SERIES.filter(s=>S.sond.some(p=>num(p.scores&&p.scores[s.id])!=null));
+  return `<div class="view-head"><div><h2>Tendances</h2><p>Les intentions de vote au premier tour, sondage par sondage, et les événements de la campagne. Choisis la période pour zoomer sur la chronologie.</p></div><span class="actions">${addBtn("sondages","Ajouter un sondage")}${addBtn("evenements","Ajouter un événement")}</span></div>
+    <div class="filters-row">
+      <div class="seg" role="group" aria-label="Période">${[["3m","3 mois"],["6m","6 mois"],["12m","1 an"],["tout","Tout"]].map(([k,l])=>`<button type="button" id="tp-${k}" data-tp="${k}" aria-pressed="${S.f.periode===k}">${l}</button>`).join("")}</div>
+      <div class="range"><label for="tDu">Du</label><input type="date" id="tDu" value="${from}"><label for="tAu">au</label><input type="date" id="tAu" value="${to}"></div>
+    </div>
+    <div class="chips" role="group" aria-label="Candidats affichés">${avecDonnees.map(s=>`<button class="lchip" id="lg-${s.id}" data-lg="${s.id}" aria-pressed="${!S.f.masques.includes(s.id)}"><span class="key" style="background:${serieVar(s.id)}"></span>${esc(nomSerie(s.id))}</button>`).join("")}</div>
+    <div class="stack" id="tendBody" style="gap:24px">${tendBody()}</div>`}
+
+function viewVerifs(){
+  let list=S.args;
+  if(S.f.verdict!=="all")list=list.filter(a=>a.verdict===S.f.verdict);
+  if(S.f.auteur!=="all")list=list.filter(a=>(a.auteur||"_")===S.f.auteur);
+  list=sortChecks(list);
+  const authors=sortCand(S.cand.filter(c=>S.args.some(a=>a.auteur===c.id)));
+  const vchips=[["all","Toutes",S.args.length],...Object.keys(VERDICTS).map(k=>[k,VERDICTS[k],S.args.filter(a=>a.verdict===k).length])];
+  const achips=[["all","Tout le monde"],...authors.map(c=>[c.id,c.nom]),...(S.args.some(a=>!a.auteur)?[["_","Idées reçues"]]:[])];
+  return `<div class="view-head"><div><h2>Vrai / Faux</h2><p>Les affirmations entendues en débat, vérifiées contre les sources officielles. Le minutage ouvre la vidéo au moment exact ; « Copier » donne un texte prêt à coller.</p></div>${addBtn("arguments","Ajouter une vérification")}</div>
+    <div class="chips">${vchips.map(([k,l,n])=>`<button class="chip" data-fverdict="${k}" aria-pressed="${S.f.verdict===k}">${esc(l)}<span class="n">${n}</span></button>`).join("")}</div>
+    <div class="chips">${achips.map(([k,l])=>`<button class="chip" data-fauteur="${esc(k)}" aria-pressed="${S.f.auteur===k}">${esc(l)}</button>`).join("")}</div>
+    ${loadingOr("args",list.length?`<div class="grid">${list.map(a=>factCard(a)).join("")}</div>`:"","Aucune vérification ne correspond à ces filtres.")}`}
+
+function viewCandidats(){
+  let list=sortCand(S.cand);
+  if(!S.f.retires)list=list.filter(c=>c.statut!=="retire");
+  if(S.f.bord!=="all")list=list.filter(c=>c.bord===S.f.bord);
+  let body="";
+  for(const b of Object.keys(BORDS)){const g=list.filter(c=>c.bord===b);if(g.length)body+=`<div class="group-title">${esc(BORDS[b])}</div><div class="grid">${g.map(candCard).join("")}</div>`}
+  return `<div class="view-head"><div><h2>Qui est dans la course</h2><p>Ouvre une fiche pour voir les mesures, leur coût, ce qui coince et ce qui a été vérifié en débat. Une candidature n'est officielle qu'avec 500 parrainages validés par le Conseil constitutionnel.</p></div>${addBtn("candidats","Ajouter un candidat")}</div>
+    <div class="chips">${[["all","Tous"],...Object.entries(BORDS)].map(([k,v])=>`<button class="chip" data-fbord="${k}" aria-pressed="${S.f.bord===k}">${esc(v)}</button>`).join("")}<button class="chip" data-fretires aria-pressed="${S.f.retires}">Afficher les retirés</button></div>
+    ${loadingOr("cand",body,"Aucun candidat enregistré pour l'instant.")}`}
+
+function viewComparer(){
+  const cands=sortCand(S.cand).filter(c=>c.statut!=="retire");
+  const rows=cands.map(c=>{const ms=S.mes.filter(m=>m.candidat===c.id&&m.theme===S.f.theme);
+    return `<tr><th><button class="link" data-open="${esc(c.id)}">${esc(c.nom)}</button><div class="small muted">${esc(c.parti)}</div></th>
+      <td>${ms.length?ms.map(m=>`<div class="m-item"><span class="m-title">${esc(m.titre)}</span>${m.cout?`<span class="cost">${esc(m.cout)}</span>`:""}<span class="m-tags">${fiabTag(m.fiabilite)}${tsLink(m)}</span>${m.coince?`<span class="small muted">Ce qui coince : ${esc(m.coince)}</span>`:""}</div>`).join(""):`<span class="small muted">Rien de précis recensé sur ce thème.</span>`}</td></tr>`}).join("");
+  const facts=S.chif.filter(f=>f.theme===S.f.theme);
+  return `<div class="view-head"><div><h2>Comparer par thème</h2><p>Les positions de chaque candidat côte à côte, avec les chiffres de référence du thème en dessous.</p></div>${addBtn("mesures","Ajouter une mesure")}</div>
+    <div class="chips">${Object.entries(THEMES).map(([k,v])=>`<button class="chip" data-ftheme="${k}" aria-pressed="${S.f.theme===k}">${esc(v)}</button>`).join("")}</div>
+    ${loadingOr("mes",cands.length?`<div class="table-scroll"><table class="cmp"><tbody>${rows}</tbody></table></div>`:"","Aucun candidat enregistré.")}
+    ${facts.length?`<h3 class="sec">Chiffres de référence : ${esc(THEMES[S.f.theme])}</h3><div class="grid">${facts.map(statCard).join("")}</div>`:""}`}
+
+function viewDebats(){
+  const list=[...S.deb].sort(byDateDesc("date"));
+  return `<div class="view-head"><div><h2>Débats télévisés</h2><p>Les chapitres, les temps forts et les vérifications de chaque débat, avec un lien vers le moment exact de la vidéo.</p></div>${addBtn("debats","Ajouter un débat")}</div>
+    ${loadingOr("deb",list.length?list.map(debateCard).join(""):"","Aucun débat enregistré pour l'instant.")}`}
+
+function viewChiffres(){
+  const used=[...new Set(S.chif.map(f=>f.theme))];
+  let list=S.chif;if(S.f.chif!=="all")list=list.filter(f=>f.theme===S.f.chif);
+  list=[...list].sort((a,b)=>(b.une?1:0)-(a.une?1:0)||Object.keys(THEMES).indexOf(a.theme)-Object.keys(THEMES).indexOf(b.theme));
+  return `<div class="view-head"><div><h2>Chiffres clés</h2><p>Des chiffres sourcés (Insee, COR, DREES, ministères) pour cadrer un débat. « Copier » donne une phrase prête à citer, avec la source et la date.</p></div>${addBtn("chiffres","Ajouter un chiffre")}</div>
+    <div class="chips">${[["all","Tous"],...Object.entries(THEMES).filter(([k])=>used.includes(k))].map(([k,v])=>`<button class="chip" data-fchif="${k}" aria-pressed="${S.f.chif===k}">${esc(v)}</button>`).join("")}</div>
+    ${loadingOr("chif",list.length?`<div class="grid">${list.map(statCard).join("")}</div>`:"","Aucun chiffre enregistré.")}`}
+
+function viewJournal(){
+  const list=[...S.jour].sort(byDateDesc("date"));
+  return `<div class="view-head"><div><h2>Journal des mises à jour</h2><p>Ce qui a changé dans le dossier, jour après jour. Les mises à jour automatiques passent chaque matin.</p></div></div>
+    ${loadingOr("jour",list.length?`<div class="stack">${list.map(journalEntry).join("")}</div>`:"","Aucune mise à jour enregistrée pour l'instant.")}`}
+
+function viewMethode(){
+  return `<div class="view-head"><div><h2>Méthode</h2><p>Comment lire les étiquettes, d'où viennent les données et comment l'outil se met à jour.</p></div></div>
+  <div class="grid">
+    <article class="card stack"><h3>Les verdicts</h3>
+      <p><span class="vlabel v-vrai">Vrai</span>Le chiffre est juste et la conclusion tient.</p>
+      <p><span class="vlabel v-nuancer">À nuancer</span>Le chiffre est proche, ou juste mais incomplet.</p>
+      <p><span class="vlabel v-trompeur">Trompeur</span>Le chiffre existe mais la conclusion qu'on en tire est fausse.</p>
+      <p><span class="vlabel v-faux">Faux</span>Le chiffre ou le fait est contredit par les sources.</p></article>
+    <article class="card stack"><h3>La fiabilité des mesures</h3>
+      <p>${fiabTag("officiel")} L'organisme public ou le candidat lui-même : programme publié, propos tenus en débat.</p>
+      <p>${fiabTag("presse")} Rapporté par un média national. Fiable, mais une position peut évoluer.</p>
+      <p>${fiabTag("verifier")} Source unique ou site agrégateur. Vérifie le site du candidat avant de citer.</p></article>
+    <article class="card stack"><h3>Mise à jour automatique</h3>
+      <p>Chaque matin vers 6 h 45 (heure de Paris), Claude recherche les nouvelles candidatures, propositions, débats, sondages et statistiques officielles. Il met les fiches à jour et note ce qu'il a changé dans le Journal. La page se met à jour toute seule, sans recharger.</p>
+      <p>Si le badge en haut affiche « Pas de mise à jour depuis… », la mise à jour automatique ne tourne plus : préviens la personne qui t'a envoyé le lien.</p></article>
+    <article class="card stack"><h3>Les tendances</h3>
+      <p>Chaque point est un sondage. Le trait est une moyenne lissée : chaque sondage pèse d'autant plus qu'il est proche de la date, sur environ trois semaines.</p>
+      <p>Les instituts testent des hypothèses différentes et publient souvent des fourchettes, ramenées ici à leur milieu. Avant juillet 2026, le RN était surtout testé avec Jordan Bardella, dont la courbe est tracée à part.</p>
+      <p>Une intention de vote mesure l'opinion à un moment donné : ce n'est pas une prévision du résultat.</p></article>
+    <article class="card stack"><h3>Avant de citer un chiffre</h3>
+      <p>Donne toujours la source et la date : « 3 595 Md€ de dette, Insee, fin juin 2026 ». Un chiffre sans date se fait démonter.</p>
+      <p>Distingue le coût brut d'une mesure de son coût net, et le chiffrage d'un candidat d'un chiffrage indépendant (Institut Montaigne, OFCE, Fipeco, IPP).</p>
+      <p>Les citations de débat viennent de la transcription automatique de la vidéo : le minutage permet de réécouter avant de citer.</p></article>
+  </div>
+  <div class="row small muted"><span>Position sur l'arc : ${Object.keys(BORDS).filter(b=>BORD_POS[b]!=null).map(b=>`<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px">${arcSvg(b)}${esc(BORDS[b])}</span>`).join("")}</span></div>`}
+
+function viewSearch(q){
+  const n=norm(q),hit=o=>norm(JSON.stringify(o)).includes(n);
+  const themeKeys=Object.entries(THEMES).filter(([k,v])=>norm(v).includes(n)||k.includes(n)).map(([k])=>k);
+  const cands=S.cand.filter(c=>norm(c.nom+" "+c.parti).includes(n)),ids=cands.map(c=>c.id);
+  const chif=S.chif.filter(f=>hit(f)||themeKeys.includes(f.theme));
+  const args=sortChecks(S.args.filter(a=>hit(a)||themeKeys.includes(a.theme)||ids.includes(a.auteur)));
+  const debs=S.deb.filter(d=>hit(d)||arr(d.participants).some(p=>ids.includes(p)));
+  const mes=S.mes.filter(m=>hit(m)||themeKeys.includes(m.theme)||ids.includes(m.candidat));
+  const actus=[...S.actu].filter(d=>isIso(d.date)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,14)
+    .flatMap(d=>arr(d.items).map(it=>({...it,_date:d.date}))).filter(it=>hit(it)||themeKeys.includes(it.theme)||arr(it.candidats).some(c=>ids.includes(c)));
+  const total=cands.length+chif.length+args.length+debs.length+mes.length+actus.length;
+  return `<div class="view-head"><div><h2>« ${esc(q)} »</h2><p>${total} résultat${total>1?"s":""}. Les chiffres et les vérifications passent en premier : ce sont eux qu'on sort en débat.</p></div><button class="btn" id="clearq">Effacer la recherche</button></div>
+    ${chif.length?`<h3 class="sec">Chiffres</h3><div class="grid">${chif.map(statCard).join("")}</div>`:""}
+    ${args.length?`<h3 class="sec">Vrai / Faux</h3><div class="grid">${args.map(a=>factCard(a)).join("")}</div>`:""}
+    ${actus.length?`<h3 class="sec">Actu récente</h3><div class="grid">${actus.map(it=>actuCard(it,false,it._date)).join("")}</div>`:""}
+    ${cands.length?`<h3 class="sec">Candidats</h3><div class="grid">${cands.map(candCard).join("")}</div>`:""}
+    ${debs.length?`<h3 class="sec">Débats</h3><div class="grid">${debs.map(debateMini).join("")}</div>`:""}
+    ${mes.length?`<h3 class="sec">Mesures</h3><div class="stack">${mes.map(m=>measureBlock(m,true)).join("")}</div>`:""}
+    ${total?"":`<div class="empty">Rien trouvé. Essaie un mot plus court : « retraite », « dette », « SMIC ».</div>`}`}
+
+/* ---------- fiche candidat ---------- */
+function openCand(id){
+  const c=candById(id);if(!c)return;
+  S.openCand=id;
+  const ms=S.mes.filter(m=>m.candidat===id);
+  const checks=sortChecks(S.args.filter(a=>a.auteur===id));
+  const debs=S.deb.filter(d=>arr(d.participants).includes(id)).sort(byDateDesc("date"));
+  const byTheme=Object.keys(THEMES).map(t=>[t,ms.filter(m=>m.theme===t)]).filter(([,l])=>l.length);
+  showOverlay(`<div class="drawer-head"><div class="stack" style="gap:6px"><div class="row" style="justify-content:flex-start">${arcSvg(c.bord)}${statutTag(c.statut)}</div>
+      <h2>${esc(c.nom)}</h2><div class="muted">${esc(c.parti)} · ${esc(BORDS[c.bord]||"")}${c.dateDeclaration?` · déclaré le ${fmtDate(c.dateDeclaration,true)}`:""}</div></div>
+      <div class="actions">${editBtn("candidats",c.id)}<button class="btn" data-close>Fermer</button></div></div>
+    ${c.resume?`<p>${esc(c.resume)}</p>`:""}
+    ${c.sondage?`<p class="notice"><b>Sondages :</b> <span class="mono">${esc(c.sondage)}</span></p>`:""}
+    ${c.etatProgramme?`<p class="small muted">État du programme : ${esc(c.etatProgramme)}</p>`:""}
+    ${srcLinks(c.sources)}
+    ${debs.length?`<div class="group-title">Débats</div><ul class="moments">${debs.map(d=>`<li><a href="#debats">${esc(d.titre)}</a> <span class="small muted">${fmtDate(d.date)}</span></li>`).join("")}</ul>`:""}
+    ${checks.length?`<div class="group-title">Vérifié en débat</div><div class="stack">${checks.map(a=>factCard(a)).join("")}</div>`:""}
+    ${S.canEdit?`<div><button class="btn primary" data-edit="mesures" data-cand="${esc(c.id)}">Ajouter une mesure</button></div>`:""}
+    ${byTheme.length?byTheme.map(([t,l])=>`<div class="group-title">${esc(THEMES[t])}</div><div class="stack">${l.map(m=>measureBlock(m,false)).join("")}</div>`).join(""):`<div class="empty">Aucune mesure recensée pour ce candidat.</div>`}`)}
+
+/* ---------- édition ---------- */
+const SCHEMAS={
+ candidats:[["nom","Nom","text"],["parti","Parti / mouvement","text"],["bord","Position","select",BORDS],["statut","Statut","select",STATUTS],["dateDeclaration","Date de déclaration","date"],["resume","Résumé","textarea"],["sondage","Sondages","text","Ex. Ifop/LCI, 3 nov. 2026 : 17,5–18 %"],["etatProgramme","État du programme","text"],["ordre","Ordre d'affichage","number"],["sources","Sources","sources"]],
+ mesures:[["candidat","Candidat","cand"],["theme","Thème","select",THEMES],["titre","Mesure","text"],["detail","Détail","textarea"],["cout","Coût / impact","text","Préciser qui chiffre : candidat, institut…"],["fiabilite","Fiabilité","select",FIAB],["pour","Arguments pour","list"],["contre","Arguments contre","list"],["coince","Ce qui coince","textarea"],["debat","Défendue lors du débat","debopt"],["moment","Minutage dans la vidéo","time","Ex. 1:09:45"],["sources","Sources","sources"]],
+ chiffres:[["theme","Thème","select",THEMES],["libelle","Libellé","text"],["valeur","Valeur","text"],["precision","Précision","textarea"],["usage","À sortir quand…","textarea"],["source","Source","text"],["url","Lien de la source","url"],["date","Date de la donnée","text"],["une","Mettre à la une","check"]],
+ sondages:[["date","Date (fin du terrain)","date"],["institut","Institut","text"],["commanditaire","Commanditaire","text"],["echantillon","Échantillon","number"],["hypothese","Hypothèse testée","text"],["scores","Intentions de vote au premier tour (%)","scores"],["fourchettes","Fourchettes et remarques","textarea"],["fiabilite","Fiabilité","select",FIAB],["sources","Sources","sources"]],
+ evenements:[["date","Date","date"],["titre","Événement","text"],["type","Type","select",TYPES_EVT],["detail","Détail","textarea"],["sources","Sources","sources"]],
+ arguments:[["theme","Thème","select",THEMES],["affirmation","Affirmation","textarea"],["verdict","Verdict","select",VERDICTS],["explication","Explication","textarea"],["auteur","Dit par","candopt"],["debat","Débat","debopt"],["moment","Minutage dans la vidéo","time","Ex. 51:23"],["sources","Sources","sources"]],
+ debats:[["titre","Titre","text"],["date","Date","date"],["chaine","Chaîne","text"],["sujet","Thème du débat","text"],["lieu","Lieu / format","text"],["participants","Participants","multicand"],["absents","Absents notables","text"],["video","Lien de la vidéo","url"],["chapitres","Chapitres","chapters","Une ligne par chapitre : 1:09:45 — Titre"],["tempsForts","Temps forts","list","Une ligne par moment : Thème — ce qui s'est dit"],["limites","Limites de ce résumé","textarea"],["sources","Sources","sources"]]
+};
+function fieldHtml([k,label,type,opt],v){
+  const id="f_"+k;let input;
+  if(type==="multicand")return `<fieldset class="field"><legend>${esc(label)}</legend><div class="checks" id="${id}">${sortCand(S.cand).map(c=>`<label><input type="checkbox" id="${id}_${esc(c.id)}" value="${esc(c.id)}"${arr(v).includes(c.id)?" checked":""}> ${esc(c.nom)}</label>`).join("")}</div></fieldset>`;
+  if(type==="scores"){
+    const ids=[...SERIES.map(s=>s.id),...sortCand(S.cand).filter(c=>c.statut!=="retire"&&!SERIES.some(s=>s.id===c.id)).map(c=>c.id)];
+    Object.keys(v||{}).forEach(cid=>{if(!ids.includes(cid))ids.push(cid)});
+    return `<fieldset class="field"><legend>${esc(label)}</legend><div class="scores" id="${id}">${ids.map(cid=>`<label>${esc(nomSerie(cid))}<input type="number" id="${id}_${esc(cid)}" data-id="${esc(cid)}" step="0.5" min="0" max="100" inputmode="decimal" value="${v&&v[cid]!=null?esc(v[cid]):""}"></label>`).join("")}</div><span class="hint">En %, milieu de la fourchette si besoin. Laisse vide quand la personne n'était pas testée.</span></fieldset>`}
+  if(type==="check")return`<div class="field"><label><input type="checkbox" id="${id}"${v?" checked":""}> ${esc(label)}</label></div>`;
+  if(type==="select")input=`<select id="${id}">${Object.entries(opt).map(([a,b])=>`<option value="${a}"${v===a?" selected":""}>${esc(b)}</option>`).join("")}</select>`;
+  else if(type==="cand"||type==="candopt")input=`<select id="${id}">${type==="candopt"?`<option value="">Personne (idée reçue)</option>`:""}${sortCand(S.cand).map(c=>`<option value="${esc(c.id)}"${v===c.id?" selected":""}>${esc(c.nom)}</option>`).join("")}</select>`;
+  else if(type==="debopt")input=`<select id="${id}"><option value="">Aucun</option>${[...S.deb].sort(byDateDesc("date")).map(d=>`<option value="${esc(d.id)}"${v===d.id?" selected":""}>${esc(d.titre)} (${fmtDate(d.date)})</option>`).join("")}</select>`;
+  else if(type==="textarea")input=`<textarea id="${id}">${esc(v)}</textarea>`;
+  else if(type==="list")input=`<textarea id="${id}">${esc(arr(v).join("\n"))}</textarea>`;
+  else if(type==="chapters")input=`<textarea id="${id}">${esc(arr(v).map(c=>`${fmtTime(c.t)} — ${c.titre}`).join("\n"))}</textarea>`;
+  else if(type==="sources")input=`<textarea id="${id}">${esc(arr(v).map(s=>s.url?`${s.titre||""} | ${s.url}`:s.titre).join("\n"))}</textarea>`;
+  else if(type==="time")input=`<input id="${id}" type="text" inputmode="numeric" value="${v==null?"":fmtTime(v)}">`;
+  else input=`<input id="${id}" type="${type}" value="${esc(v)}">`;
+  const hint=typeof opt==="string"?opt:type==="list"?"Un élément par ligne.":type==="sources"?"Une source par ligne : Titre | https://lien":"";
+  return `<div class="field"><label for="${id}">${esc(label)}</label>${input}${hint?`<span class="hint">${esc(hint)}</span>`:""}</div>`}
+function readForm(col){
+  const data={};
+  for(const [k,,type] of SCHEMAS[col]){
+    const el=$("#f_"+k);if(!el)continue;
+    if(type==="multicand"){data[k]=[...el.querySelectorAll("input:checked")].map(i=>i.value);continue}
+    if(type==="check"){data[k]=!!el.checked;continue}
+    if(type==="scores"){const o={};el.querySelectorAll("input").forEach(i=>{if(i.value!=="")o[i.dataset.id]=Number(i.value)});data[k]=o;continue}
+    const v=el.value.trim();
+    if(type==="list")data[k]=v.split("\n").map(s=>s.trim()).filter(Boolean);
+    else if(type==="chapters")data[k]=v.split("\n").map(s=>s.trim()).filter(Boolean).map(l=>{const m=l.match(/^([\d:]+)\s*[—–-]\s*(.+)$/);return m?{t:parseTime(m[1]),titre:m[2].trim()}:null}).filter(Boolean);
+    else if(type==="sources")data[k]=v.split("\n").map(s=>s.trim()).filter(Boolean).map(l=>{const i=l.lastIndexOf("|");return i>-1?{titre:l.slice(0,i).trim(),url:l.slice(i+1).trim()}:/^https?:/.test(l)?{titre:l,url:l}:{titre:l}});
+    else if(type==="number")data[k]=v===""?null:Number(v);
+    else if(type==="time")data[k]=parseTime(v);
+    else data[k]=v;
+  }
+  data.maj=new Date().toISOString().slice(0,10);
+  return data}
+function openEditor(col,id,preset={}){
+  if(!S.canEdit||!SCHEMAS[col])return;
+  S.openCand=null;
+  const list=S[COLS[col]],doc=id?list.find(d=>d.id===id):{...preset};
+  showOverlay(`<div class="drawer-head"><h2>${id?"Modifier":"Ajouter"}</h2><button class="btn" data-close>Annuler</button></div>
+    <form class="form" id="edform">${SCHEMAS[col].map(f=>fieldHtml(f,doc?.[f[0]])).join("")}
+      <div class="actions"><button class="btn primary" type="submit">Enregistrer</button>${id?`<button class="btn danger" type="button" id="del">Supprimer</button><span id="delc" hidden>Supprimer définitivement ? <button class="btn danger" type="button" id="delok">Oui, supprimer</button></span>`:""}</div></form>`);
+  $("#edform").addEventListener("submit",async e=>{e.preventDefault();
+    const data=readForm(col);
+    const newId=id||(norm(data.nom||data.titre||data.libelle||data.affirmation||[data.date,data.institut].filter(Boolean).join(" ")||"x").replace(/[^a-z0-9]+/g,"-").slice(0,40).replace(/^-|-$/g,"")+"-"+Date.now().toString(36));
+    /* update fusionne aussi l'intérieur des scores : pour qu'un score effacé disparaisse, on réécrit le sondage entier (champs hors formulaire conservés). */
+    const entier=id&&SCHEMAS[col].some(f=>f[2]==="scores"),{id:_ignore,...base}=doc||{};
+    try{const ref=S.db.collection(col).doc(newId);await (entier?ref.set({...base,...data}):id?ref.update(data):ref.set(data));closeOverlay();toast("Enregistré")}
+    catch(err){toast("Échec de l'enregistrement : "+(err?.message||err?.code||"erreur"))}});
+  if(id){$("#del").onclick=()=>{$("#delc").hidden=false};
+    $("#delok").onclick=async()=>{try{await S.db.collection(col).doc(id).delete();closeOverlay();toast("Supprimé")}catch(err){toast("Échec de la suppression")}}}}
+
+function showOverlay(html,cls){const o=$("#overlay");o.innerHTML=`<div class="scrim" data-close></div><aside class="drawer${cls?" "+cls:""}" role="dialog" aria-modal="true" tabindex="-1">${html}</aside>`;o.hidden=false;document.body.style.overflow="hidden";o.querySelector(".drawer").focus({preventScroll:true})}
+/* Feuille « Plus » de la barre d'onglets du téléphone : les sections qui n'y tiennent pas. */
+const PLUS=[["comparer","Comparer",1,'<rect x="4" y="5" width="6.5" height="14" rx="1.5"/><rect x="13.5" y="5" width="6.5" height="14" rx="1.5"/>'],
+  ["debats","Débats",2,'<path d="M5 5.5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-8l-4.5 3.5v-3.5H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"/>'],
+  ["chiffres","Chiffres",3,'<path d="M18 6 6 18"/><circle cx="7.5" cy="7.5" r="2.2"/><circle cx="16.5" cy="16.5" r="2.2"/>'],
+  ["journal","Journal",4,'<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>'],
+  ["methode","Méthode",5,'<circle cx="12" cy="12" r="8"/><path d="M12 11v5.5M12 7.7v.1"/>']];
+function openMore(){
+  const v=current();
+  showOverlay(`<div class="drawer-head"><h2>Plus</h2><button class="btn" data-close>Fermer</button></div>
+    <nav class="list" aria-label="Autres sections">${PLUS.map(([k,l,c,ico])=>`<a href="#${k}"${v===k?' aria-current="page"':""}><span class="ico" style="background:var(--ic-${c})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ico}</svg></span><span>${l}</span><svg class="chev" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 1.5 5 5.5-5 5.5"/></svg></a>`).join("")}</nav>`,"compact")}
+function closeOverlay(){S.openCand=null;const o=$("#overlay");o.hidden=true;o.innerHTML="";document.body.style.overflow=""}
+
+/* ---------- copie ---------- */
+function copyText(txt,ok){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast(ok),()=>toast("Copie impossible ici : sélectionne le texte à la main"))}else toast("Copie impossible ici : sélectionne le texte à la main")}
+function fcText(a){const d=debById(a.debat),who=a.auteur?candName(a.auteur):"",when=d&&a.moment!=null?`${d.titre}, ${fmtTime(a.moment)}`:"",src=arr(a.sources).map(s=>s.titre).filter(Boolean).join(", ");
+  return `${(VERDICTS[a.verdict]||a.verdict||"").toUpperCase()} : « ${a.affirmation} »${who||when?` (${[who,when].filter(Boolean).join(", ")})`:""}. ${a.explication}${src?` Sources : ${src}.`:""}`}
+
+/* ---------- en-tête et routage ---------- */
+const VIEWS={une:viewUne,tendances:viewTendances,verifs:viewVerifs,candidats:viewCandidats,comparer:viewComparer,debats:viewDebats,chiffres:viewChiffres,journal:viewJournal,methode:viewMethode};
+const ALIAS={arguments:"verifs"};
+function current(){const h=location.hash.slice(1);const k=ALIAS[h]||h;return VIEWS[k]?k:"une"}
+function renderHeader(){
+  const days=daysTo(tour1());
+  $("#countBadge").innerHTML=days>0?`<b>J-${days}</b> premier tour le ${fmtDate(tour1(),true)}`:`Premier tour le ${fmtDate(tour1(),true)}`;
+  const b=$("#autoBadge"),last=[...S.jour].sort(byDateDesc("date"))[0];
+  let txt="Mise à jour automatique chaque matin",warn=false;
+  if(S.offline)txt="Données indisponibles";
+  else if(last){const age=-daysTo(last.date);if(age>2){txt=`Pas de mise à jour depuis ${age} jours`;warn=true}else txt=`À jour au ${fmtDate(last.date)} · auto chaque matin`}
+  b.classList.toggle("warn",warn);$("#autoTxt").textContent=txt}
+function render(){
+  const q=$("#q").value.trim(),v=current();
+  const act=document.activeElement,fid=act&&act.id&&act.closest&&act.closest("#view")?act.id:"";
+  document.querySelectorAll("#tabs a").forEach(a=>{if(!q&&a.getAttribute("href")==="#"+v)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  document.querySelectorAll("#tabbar [data-tab]").forEach(a=>{if(!q&&a.dataset.tab===v)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  const mb=$("#moreBtn");if(!q&&PLUS.some(p=>p[0]===v))mb.setAttribute("aria-current","page");else mb.removeAttribute("aria-current");
+  $("#view").innerHTML=q.length>=2?viewSearch(q):VIEWS[v]();
+  renderHeader();
+  if(q.length<2&&v==="tendances")bindTendances();
+  if(fid){const n=document.getElementById(fid);if(n)n.focus({preventScroll:true})}}
+$("#quick").innerHTML=`<span class="lbl">Sujets chauds :</span>`+QUICK.map(t=>`<button class="chip" data-q="${esc(t)}">${esc(t)}</button>`).join("");
+window.addEventListener("hashchange",()=>{$("#q").value="";closeOverlay();render();window.scrollTo(0,0)});
+$("#q").addEventListener("input",()=>render());
+$("#searchBtn").addEventListener("click",()=>{window.scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});$("#q").focus({preventScroll:true})});
+$("#searchForm").addEventListener("submit",e=>{e.preventDefault();$("#q").blur()});
+/* Une date en cours de frappe (année « 0002 ») n'est pas appliquée. */
+const okDate=d=>isIso(d)&&d>="2000-01-01"&&d<="2100-12-31";
+document.addEventListener("change",e=>{if(e.target.id!=="tDu"&&e.target.id!=="tAu")return;const du=$("#tDu").value,au=$("#tAu").value;if(!okDate(du)||!okDate(au))return;
+  S.f.periode="perso";S.f.du=du;S.f.au=au;
+  document.querySelectorAll("[data-tp]").forEach(b=>b.setAttribute("aria-pressed","false"));
+  const body=$("#tendBody");if(body){body.innerHTML=tendBody();bindTendances()}});
+document.addEventListener("toggle",e=>{if(e.target.id==="pollsDetails")S.f.tableOuvert=e.target.open;else if(e.target.id==="horsDetails")S.f.horsOuvert=e.target.open;else if(e.target.id==="actuArchives")S.f.actuOuvert=e.target.open},true);
+/* Sur écran tactile, l'infobulle reste affichée jusqu'à un appui en dehors du graphique. */
+document.addEventListener("pointerdown",e=>{if(e.target.closest&&e.target.closest("#tendBox"))return;const tip=$("#ttip"),xh=document.getElementById("xh");if(tip)tip.hidden=true;if(xh)xh.setAttribute("visibility","hidden")});
+let lastVW=$("#view").clientWidth,rsz;
+window.addEventListener("resize",()=>{clearTimeout(rsz);rsz=setTimeout(()=>{const w=$("#view").clientWidth;if(w===lastVW)return;lastVW=w;if(current()==="tendances"&&$("#q").value.trim().length<2)render()},150)});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&!$("#overlay").hidden)closeOverlay();
+  if(e.key==="/"&&!["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)){e.preventDefault();$("#q").focus()}});
+document.addEventListener("click",e=>{
+  if(e.target.closest('#overlay a[href^="#"]'))closeOverlay();
+  const t=e.target.closest("[data-close],[data-open],[data-edit],[data-copy],[data-copyfc],[data-q],[data-fbord],[data-fretires],[data-ftheme],[data-fchif],[data-fverdict],[data-fauteur],[data-tp],[data-lg],[data-more],#clearq");if(!t)return;
+  if(t.matches("[data-more]"))return openMore();
+  if(t.dataset.tp){S.f.periode=t.dataset.tp;return render()}
+  if(t.dataset.lg){const id=t.dataset.lg,i=S.f.masques.indexOf(id);if(i>-1)S.f.masques.splice(i,1);else S.f.masques.push(id);return render()}
+  if(t.matches("[data-close]"))return closeOverlay();
+  if(t.id==="clearq"){$("#q").value="";return render()}
+  if(t.dataset.q){$("#q").value=t.dataset.q;render();window.scrollTo(0,0);return}
+  if(t.dataset.edit){e.stopPropagation();return openEditor(t.dataset.edit,t.dataset.id,t.dataset.cand?{candidat:t.dataset.cand}:{})}
+  if(t.dataset.open)return openCand(t.dataset.open);
+  if(t.dataset.copy){const f=S.chif.find(x=>x.id===t.dataset.copy);if(f)copyText(`${f.libelle} : ${f.valeur} (${f.source||""}${f.date?", "+f.date:""})`,"Copié, prêt à coller");return}
+  if(t.dataset.copyfc){const a=S.args.find(x=>x.id===t.dataset.copyfc);if(a)copyText(fcText(a),"Vérification copiée");return}
+  if(t.dataset.fbord){S.f.bord=t.dataset.fbord;return render()}
+  if(t.matches("[data-fretires]")){S.f.retires=!S.f.retires;return render()}
+  if(t.dataset.ftheme){S.f.theme=t.dataset.ftheme;return render()}
+  if(t.dataset.fchif){S.f.chif=t.dataset.fchif;return render()}
+  if(t.dataset.fverdict){S.f.verdict=t.dataset.fverdict;return render()}
+  if(t.dataset.fauteur){S.f.auteur=t.dataset.fauteur;return render()}
+});
+
+/* ---------- données ---------- */
+render();
+(async()=>{
+  const timer=setTimeout(()=>{if(!Object.values(S.loaded).some(Boolean)){S.offline=true;render()}},10000);
+  const db=await Promise.resolve(window.claude?.use?.("db")).catch(()=>null);
+  if(!db){clearTimeout(timer);S.offline=true;return render()}
+  S.db=db;
+  const user=await Promise.resolve(window.claude?.use?.("user")).catch(()=>null);
+  try{S.canEdit=!!(user&&await user.canEdit())}catch{S.canEdit=false}
+  for(const [col,key] of Object.entries(COLS)){
+    db.collection(col).onSnapshot(snap=>{
+      clearTimeout(timer);S.offline=false;
+      S[key]=snap.docs.map(d=>({id:d.id,...d.data()}));S.loaded[key]=true;
+      render();
+      if(!$("#overlay").hidden&&S.openCand&&!$("#overlay form"))openCand(S.openCand)},
+    err=>{clearTimeout(timer);S.loaded[key]=true;render();toast("Lecture impossible : "+(err?.message||err?.code||"erreur"))});
+  }
+})();
+</script>
+</body>
+</html>

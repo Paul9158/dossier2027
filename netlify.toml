@@ -1,0 +1,8 @@
+# Site statique : rien à compiler, Netlify publie le dossier docs tel quel.
+[build]
+  publish = "docs"
+
+[[headers]]
+  for = "/data.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
