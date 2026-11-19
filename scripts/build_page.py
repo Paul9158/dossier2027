@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Fabrique docs/index.html, la version publique en lecture seule, à partir de la page de l'artefact claude.ai.
 
-Usage : python3 scripts/build_page.py [source/artifact.html] [docs/index.html]
+Usage : python3 scripts/build_page.py [PAGE.html] [docs/index.html] [--save-source]
+
+PAGE.html vaut source/artifact.html par défaut. Avec --save-source, la page lue (débarrassée
+du squelette ajouté par claude.ai) remplace source/artifact.html.
 
 La page de l'artefact lit ses données avec window.claude.use("db"). Ici, un petit module
 remplace cet accès par la lecture de data.json (même dossier), sans écriture possible.
@@ -10,11 +13,19 @@ Si site.json contient {"url": "https://..."}, les balises d'aperçu de lien poin
 import html, json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-src_path = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "source" / "artifact.html"
-out_path = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs" / "index.html"
+args = [a for a in sys.argv[1:] if not a.startswith("--")]
+src_path = pathlib.Path(args[0]) if args else ROOT / "source" / "artifact.html"
+out_path = pathlib.Path(args[1]) if len(args) > 1 else ROOT / "docs" / "index.html"
 src = src_path.read_text(encoding="utf-8")
 
 # La page de l'artefact est un fragment : partie <head> (title, link, style) puis le contenu.
+# Lue avec l'outil Artifact, elle arrive enveloppée dans le squelette de claude.ai : on en ressort le fragment.
+m_wrap = re.search(r"<body[^>]*>(.*)</body>", src, re.S | re.I)
+if m_wrap and re.match(r"\s*<(title|meta|link|style)\b", m_wrap.group(1), re.I):
+    src = m_wrap.group(1).strip() + "\n"
+if "--save-source" in sys.argv:
+    (ROOT / "source" / "artifact.html").write_text(src, encoding="utf-8")
+
 if re.search(r"<!doctype|<html[\s>]", src[:500], re.I):
     m_head = re.search(r"<head[^>]*>(.*?)</head>", src, re.S | re.I)
     m_body = re.search(r"<body[^>]*>(.*)</body>", src, re.S | re.I)
@@ -28,7 +39,12 @@ else:
     head, body = src[:m.start()], src[m.start():]
 
 head = re.sub(r'<meta name="claude:[^"]*"[^>]*>\s*', "", head)
-head = re.sub(r"<meta charset[^>]*>\s*|<meta name=\"viewport\"[^>]*>\s*", "", head, flags=re.I)
+head = re.sub(r"<meta charset[^>]*>\s*|<meta name=\"?viewport\"?[^>]*>\s*", "", head, flags=re.I)
+
+# Le module de remplacement ne sait servir que la base (db) et l'utilisateur (user).
+used = set(re.findall(r"""claude\?*\.use\?*\.?\(\s*["'](\w+)["']""", src))
+if used - {"db", "user"}:
+    print("Attention, la page utilise des capacités non gérées ici :", ", ".join(sorted(used - {"db", "user"})), file=sys.stderr)
 
 # Textes propres à claude.ai, adaptés pour les visiteurs.
 REPLACE = [
